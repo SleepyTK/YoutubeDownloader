@@ -149,6 +149,7 @@ class App(CTk):
 			placeholder_text="Search YouTube..."
 		)
 		self.search_entry.place(x=580, y=340)
+		self.search_entry.bind("<Return>", lambda event: self.perform_search())
 
 		self.search_button = CTkButton(
 			master=self.main_frame,
