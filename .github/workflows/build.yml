@@ -18,13 +18,9 @@ jobs:
 
     - name: Setup FFmpeg
       run: |
-        # Create directory structure
         New-Item -Path "src/ffmpeg" -ItemType Directory -Force
-        
-        # Download and extract FFmpeg
         Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z" -OutFile ffmpeg.7z
         7z x ffmpeg.7z -osrc/ffmpeg
-        
         Get-ChildItem -Path src/ffmpeg -Recurse | Where-Object { $_.Name -match 'ffmpeg\.exe' } | Move-Item -Destination src/ffmpeg -Force
         Get-ChildItem -Path src/ffmpeg -Recurse | Where-Object { $_.Name -match 'ffprobe\.exe' } | Move-Item -Destination src/ffmpeg -Force
         Get-ChildItem -Path src/ffmpeg -Recurse
@@ -56,8 +52,8 @@ jobs:
           "src/main.py"
 
     - name: Create Release
-      uses: softprops/action-gh-release@v1
-      if: success() && startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      if: success()
       with:
         files: |
           dist/YouTube_Downloader.exe
