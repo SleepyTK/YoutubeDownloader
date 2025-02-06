@@ -1,8 +1,4 @@
-import sys
-import re
-import os
-import subprocess
-import requests
+import sys, re, os, subprocess, requests, uuid, logging
 from packaging import version
 from pathlib import Path
 from customtkinter import set_default_color_theme, CTk, CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkScrollableFrame, CTkProgressBar, CTkOptionMenu, CTkFont
@@ -10,6 +6,27 @@ from tkinter import filedialog, messagebox
 import yt_dlp
 import threading
 from pytube import Search
+
+def detect_gpu(ffmpeg_path):
+	try:
+		result = subprocess.run([ffmpeg_path, '-hide_banner', '-encoders'], 
+							  capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+		encoders = result.stdout.lower()
+		if 'nvenc' in encoders or 'cuda' in encoders:
+			return 'nvidia'
+		if 'amf' in encoders or 'amd' in encoders:
+			return 'amd'
+		if 'qsv' in encoders or 'intel' in encoders:
+			return 'intel'
+		return 'cpu'
+	except Exception as e:
+		print(f"GPU detection error: {str(e)}")
+		return 'cpu'
+
+def sanitize_filename(filename):
+	filename = re.sub(r'[\\/*?:"<>|]', '', filename)
+	filename = filename.encode('ascii', 'ignore').decode('ascii')
+	return filename.strip()[:120]
 
 class UpdateHandler:
 	def __init__(self):
@@ -51,12 +68,10 @@ class UpdateHandler:
 	def perform_update(self, download_url):
 		"""Download and replace EXE"""
 		try:
-			# Download new version
 			temp_exe = Path(os.environ['TEMP']) / "update_temp.exe"
 			response = requests.get(download_url)
 			temp_exe.write_bytes(response.content)
 
-			# Create update script
 			bat_script = f"""@echo off
 			timeout /t 1 /nobreak >nul
 			del /F /Q "{sys.executable}"
@@ -67,7 +82,6 @@ class UpdateHandler:
 			script_path = Path(os.environ['TEMP']) / "updater.bat"
 			script_path.write_text(bat_script)
 
-			# Launch updater
 			subprocess.Popen(
 				['cmd.exe', '/C', str(script_path)],
 				shell=True,
@@ -78,24 +92,50 @@ class UpdateHandler:
 			messagebox.showerror("Update Error", f"Failed to update: {str(e)}")
 			return False
 
-def sanitize_filename(filename):
-	return re.sub(r'[^\w\s-]', '', filename).replace(' ', '_')
-
 class App(CTk):
 	def __init__(self):
 		super().__init__()
 		self.title("YouTube Downloader with Search")
-		self.geometry("885x450")  # Increased window size
+		self.geometry("885x450")
 		self.resizable(0, 0)
 		self.attributes('-topmost', True)
 		self.my_font = CTkFont(family="System", weight="bold")
 		set_default_color_theme("green")
+  
+		# FFmpeg path detection
+		try:
+			base_path = Path(sys._MEIPASS)
+		except AttributeError:
+			base_path = Path(os.path.dirname(os.path.abspath(__file__)))
 
-		# Main container
+		self.ffmpeg_path = str(base_path / 'ffmpeg' / 'ffmpeg.exe')
+		self.ffprobe_path = str(base_path / 'ffmpeg' / 'ffprobe.exe')
+
+		print(f"FFmpeg path: {self.ffmpeg_path}")
+		print(f"FFmpeg exists: {os.path.exists(self.ffmpeg_path)}")
+		
+		try:
+			result = subprocess.run(
+				[self.ffmpeg_path, '-version'],
+				capture_output=True,
+				text=True,
+				creationflags=subprocess.CREATE_NO_WINDOW
+			)
+			print(f"FFmpeg output:\n{result.stdout}")
+			print(f"FFmpeg error:\n{result.stderr}")
+			
+			if result.returncode != 0:
+				raise Exception("FFmpeg test failed")
+		except Exception as e:
+			error_msg = str(e)
+			self.after(0, lambda msg=error_msg: self.progress_label.configure(
+				text=f"FFmpeg verification failed: {msg}"
+			))
+			return
+
 		self.main_frame = CTkFrame(master=self, corner_radius=6)
 		self.main_frame.pack(pady=10, padx=10, expand=True, fill="both")
 
-		# Left side components (existing)
 		self.link_entry = CTkEntry(
 			master=self.main_frame,
 			height=30,
@@ -139,7 +179,6 @@ class App(CTk):
 		)
 		self.dir_button.place(x=10, y=340)
 
-		# Right side components - Search Section
 		self.search_entry = CTkEntry(
 			master=self.main_frame,
 			height=30,
@@ -151,16 +190,16 @@ class App(CTk):
 		self.search_entry.place(x=580, y=340)
 		self.search_entry.bind("<Return>", lambda event: self.perform_search())
 
-		self.search_button = CTkButton(
+		self.encoder_menu = CTkOptionMenu(
 			master=self.main_frame,
+			values=self.get_available_encoders(self.ffmpeg_path),
 			height=30,
 			width=275,
 			corner_radius=0,
-			text="SEARCH",
-			command=self.perform_search,
-			font=self.my_font
+			font=self.my_font,
+			dropdown_font=self.my_font
 		)
-		self.search_button.place(x=580, y=380)
+		self.encoder_menu.place(x=580, y=380)
 
 		self.search_results_frame = CTkScrollableFrame(
 			master=self.main_frame,
@@ -212,7 +251,6 @@ class App(CTk):
 		)
 		self.video_button.place(x=437, y=340)
 
-		# Progress components (adjusted position)
 		self.progress_bar = CTkProgressBar(
 			master=self.main_frame,
 			orientation="horizontal",
@@ -278,13 +316,11 @@ class App(CTk):
 	def perform_search(self):
 		query = self.search_entry.get()
 		if query:
-			# Clear previous results
 			for widget in self.search_results_frame.winfo_children():
 				widget.destroy()
 		
-			# Perform search with pytube
 			search = Search(query)
-			for video in search.results[:10]:  # Show top 5 results
+			for video in search.results[:10]:
 				result_frame = CTkFrame(self.search_results_frame, corner_radius=0)
 				result_frame.pack(fill="x", padx=5, pady=2)
 				
@@ -303,6 +339,24 @@ class App(CTk):
 					font=self.my_font,
 					command=lambda url=video.watch_url: self.add_link(url)
 				).pack(side="right", padx=5, pady=5)
+		
+	def get_available_encoders(self, ffmpeg_path):
+		encoders = ['libx264 (CPU)']
+		try:
+			result = subprocess.run([ffmpeg_path, '-hide_banner', '-encoders'], 
+								capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+			encoder_output = result.stdout.lower()
+
+			if 'nvenc' in encoder_output:
+				encoders.extend(['h264_nvenc (NVIDIA)', 'hevc_nvenc (NVIDIA)'])
+			if 'amf' in encoder_output:
+				encoders.append('h264_amf (AMD)')
+			if 'qsv' in encoder_output:
+				encoders.append('h264_qsv (Intel)')
+
+		except Exception as e:
+			print(f"Encoder detection error: {str(e)}")
+		return encoders
 
 	def select_directory(self):
 		directory = filedialog.askdirectory()
@@ -342,31 +396,138 @@ class App(CTk):
 		threading.Thread(target=self.process_downloads, args=(media_type,)).start()
 
 	def process_downloads(self, media_type):
+		self.after(0, lambda: self.progress_label.configure(text="Initializing..."))
+		
+		if not os.path.isfile(self.ffmpeg_path):
+			self.after(0, lambda: self.progress_label.configure(text=f"FFmpeg not found at {self.ffmpeg_path}"))
+			return
+
+		try:
+			subprocess.run([self.ffmpeg_path, '-version'], check=True, 
+						 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		except Exception as e:
+			self.after(0, lambda: self.progress_label.configure(text=f"FFmpeg error: {str(e)}"))
+			return
+
+		try:
+			result = subprocess.run(
+				[self.ffmpeg_path, '-version'],
+				capture_output=True,
+				text=True,
+				creationflags=subprocess.CREATE_NO_WINDOW
+			)
+			
+			if result.returncode != 0:
+				raise Exception("FFmpeg test failed")
+		except Exception as e:
+			error_msg = str(e)
+			self.after(0, lambda msg=error_msg: self.progress_label.configure(
+				text=f"FFmpeg verification failed: {msg}"
+			))
+			return
+
 		total = len(self.links)
 		for index, link in enumerate(self.links, 1):
 			try:
+				if not link.startswith(('http://', 'https://')):
+					raise ValueError("Invalid URL")
+		
 				ydl_opts = {
-					'outtmpl': os.path.join(self.download_directory, f'%(title)s.%(ext)s'),
-					'progress_hooks': [self.update_progress],
-					'quiet': True,
+					'ffmpeg_location': self.ffmpeg_path,
+					'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+					'outtmpl': os.path.join(self.download_directory, '%(title)s.%(ext)s'),
+					'merge_output_format': 'mp4',
+					'verbose': True
 				}
 
-				if media_type == "audio":
-					# Direct audio download without conversion
-					ydl_opts['format'] = 'bestaudio/best'
-					ydl_opts['postprocessors'] = []  # No FFmpeg conversion
-				else:
-					# Direct video download in native format
-					res = int(self.resolution_menu.get()[:-1])
-					ydl_opts['format'] = f'bestvideo[height<={res}]+bestaudio'
-
 				with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+					info = ydl.extract_info(link, download=False)
+					video_title = sanitize_filename(info.get('title', 'untitled'))
+					video_id = info.get('id') or str(uuid.uuid4())[:8]
+
+				if media_type == "audio":
+					ydl_opts.update({
+						'outtmpl': os.path.join(self.download_directory, f'{video_title}.%(ext)s'),
+						'format': 'bestaudio/best',
+						'postprocessors': [{
+							'key': 'FFmpegExtractAudio',
+							'preferredcodec': 'mp3',
+							'preferredquality': '320',
+						}]
+					})
+				else:
+					res = int(self.resolution_menu.get()[:-1])
+					encoder = self.encoder_menu.get().split(' ')[0]
+					
+					encoder_args = {
+						'libx264': [
+							'-c:v', 'libx264',
+							'-preset', 'fast',
+							'-crf', '23',
+							'-b:v', '3M',
+							'-pix_fmt', 'yuv420p',
+							'-movflags', '+faststart'
+						],
+						'h264_nvenc': [
+							'-c:v', 'h264_nvenc',
+							'-preset', 'p6',
+							'-rc', 'vbr',
+							'-cq', '23',
+							'-b:v', '3M',
+							'-maxrate', '10M',
+							'-profile:v', 'main',
+							'-pix_fmt', 'yuv420p'
+						],
+						'h264_amf': [
+							'-c:v', 'h264_amf',
+							'-usage', 'transcoding',
+							'-quality', 'balanced',
+							'-b:v', '3M',
+							'-maxrate', '10M',
+							'-profile:v', 'main',
+							'-pix_fmt', 'yuv420p'
+						],
+						'h264_qsv': [
+							'-c:v', 'h264_qsv',
+							'-preset', 'fast',
+							'-global_quality', '23',
+							'-b:v', '3M',
+							'-maxrate', '10M',
+							'-profile:v', 'main',
+							'-pix_fmt', 'yuv420p'
+						]
+					}
+					
+					base_args = [
+						'-c:a', 'aac', 
+						'-b:a', '192k',
+						'-ar', '48000',
+						'-ac', '2'
+					]
+					
+					ydl_opts.update({
+						'outtmpl': os.path.join(self.download_directory, f'{video_title}.mp4'),
+						'format': f'bestvideo[height<={res}][vcodec!^=av01]+bestaudio/best',
+						'postprocessors': [{
+							'key': 'FFmpegVideoConvertor',
+							'preferedformat': 'mp4',
+						}],
+						'postprocessor_args': encoder_args.get(encoder, encoder_args['libx264']) + base_args
+					})
+
+				self.after(0, lambda: self.progress_label.configure(
+					text=f"Processing {index}/{total}"
+				))
+				
+				with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+					ydl.params['verbose'] = True
 					ydl.download([link])
 
 				self.update_overall_progress(index/total, index, total)
 				
 			except Exception as e:
-				print(f"Error: {e}")
+				error_msg = f"Failed: {str(e)}"
+				self.after(0, lambda: self.progress_label.configure(text=error_msg))
 				self.update_overall_progress(index/total, index, total)
 
 		self.after(0, self.clear_links)
@@ -376,6 +537,21 @@ class App(CTk):
 			progress = data.get('downloaded_bytes', 0) / data.get('total_bytes', 1)
 			self.progress_bar.set(progress)
 			self.progress_label.configure(text=f"Downloading: {os.path.basename(data['filename'])}")
+			
+		elif data['status'] == 'processing':
+			try:
+				current = data.get('elapsed', 0)
+				duration = data.get('info_dict', {}).get('duration') or 1
+				self.progress_bar.set(current / duration)
+				self.progress_label.configure(text=f"Converting: {data.get('_current_audio_ext', 'file')}")
+			except:
+				self.progress_bar.set(1)
+				self.progress_label.configure(text="Finalizing...")
+
+		elif data['status'] == 'finished':
+			self.progress_bar.set(1)
+			self.progress_label.configure(text="Finalizing...")
+			self.after(2000, lambda: self.progress_bar.set(0))
 
 	def update_overall_progress(self, progress, current, total):
 		self.progress_bar.set(progress)
