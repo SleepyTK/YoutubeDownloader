@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -23,9 +26,6 @@ jobs:
         7z x ffmpeg.7z -osrc/ffmpeg
         Get-ChildItem -Path src/ffmpeg -Recurse | Where-Object { $_.Name -match 'ffmpeg\.exe' } | Move-Item -Destination src/ffmpeg -Force
         Get-ChildItem -Path src/ffmpeg -Recurse | Where-Object { $_.Name -match 'ffprobe\.exe' } | Move-Item -Destination src/ffmpeg -Force
-        Get-ChildItem -Path src/ffmpeg -Recurse
-        Test-Path src/ffmpeg/ffmpeg.exe
-        Test-Path src/ffmpeg/ffprobe.exe
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
@@ -53,7 +53,8 @@ jobs:
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
-      if: success()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       with:
         files: |
           dist/YouTube_Downloader.exe
