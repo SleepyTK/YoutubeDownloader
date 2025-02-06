@@ -1,10 +1,82 @@
+import sys
 import re
 import os
+import subprocess
+import requests
+from packaging import version
+from pathlib import Path
 from customtkinter import set_default_color_theme, CTk, CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkScrollableFrame, CTkProgressBar, CTkOptionMenu, CTkFont
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import yt_dlp
 import threading
 from pytube import Search
+
+class UpdateHandler:
+    def __init__(self):
+        self.current_version = self.get_current_version()
+        self.repo_owner = "SleepTK"
+        self.repo_name = "YoutubeDownloader"
+        self.exe_name = "YouTube_Downloader.exe"
+
+    def get_current_version(self):
+        """Get version from bundled file"""
+        try:
+            base_path = Path(sys._MEIPASS)
+        except AttributeError:
+            base_path = Path(os.path.dirname(__file__))
+            
+        version_file = base_path / "version.txt"
+        return version_file.read_text().strip()
+
+    def check_update(self):
+        """Check GitHub releases for new version"""
+        try:
+            response = requests.get(
+                f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/releases/latest",
+                timeout=5
+            )
+            if response.status_code == 200:
+                latest_data = response.json()
+                latest_version = latest_data['tag_name'].lstrip('v')
+                
+                if version.parse(latest_version) > version.parse(self.current_version):
+                    return {
+                        'url': latest_data['assets'][0]['browser_download_url'],
+                        'version': latest_version
+                    }
+        except Exception as e:
+            print(f"Update check failed: {e}")
+        return None
+
+    def perform_update(self, download_url):
+        """Download and replace EXE"""
+        try:
+            # Download new version
+            temp_exe = Path(os.environ['TEMP']) / "update_temp.exe"
+            response = requests.get(download_url)
+            temp_exe.write_bytes(response.content)
+
+            # Create update script
+            bat_script = f"""@echo off
+            timeout /t 1 /nobreak >nul
+            del /F /Q "{sys.executable}"
+            move /Y "{temp_exe}" "{sys.executable}"
+            start "" "{sys.executable}"
+            del %0"""
+
+            script_path = Path(os.environ['TEMP']) / "updater.bat"
+            script_path.write_text(bat_script)
+
+            # Launch updater
+            subprocess.Popen(
+                ['cmd.exe', '/C', str(script_path)],
+                shell=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            return True
+        except Exception as e:
+            messagebox.showerror("Update Error", f"Failed to update: {str(e)}")
+            return False
 
 def sanitize_filename(filename):
     return re.sub(r'[^\w\s-]', '', filename).replace(' ', '_')
@@ -18,6 +90,41 @@ class App(CTk):
         self.attributes('-topmost', True)
         self.my_font = CTkFont(family="System", weight="bold")
         set_default_color_theme("green")
+
+		self.update_handler = UpdateHandler()
+        self.check_for_updates()
+
+		def check_for_updates(self):
+			"""Non-blocking update check"""
+			def update_check():
+				if update_info := self.update_handler.check_update():
+					self.show_update_prompt(update_info)    
+        	threading.Thread(target=update_check, daemon=True).start()
+
+		def show_update_prompt(self, update_info):
+			"""CTk update dialog"""
+			dialog = CTk()
+			dialog.title("Update Available")
+			dialog.geometry("400x150")
+			
+			CTkLabel(dialog, text=f"Version {update_info['version']} is available!\nUpdate now?").pack(pady=10)
+			
+			button_frame = CTkFrame(dialog)
+			button_frame.pack(pady=10)
+			
+			CTkButton(button_frame, text="Update Now", command=lambda: self.start_update(update_info['url'], dialog)).pack(side='left', padx=10)
+			CTkButton(button_frame, text="Later", command=dialog.destroy).pack(side='right', padx=10)
+			
+			dialog.after(100, lambda: dialog.attributes('-topmost', True))
+			dialog.mainloop()
+
+		def start_update(self, download_url, dialog):
+			"""Handle update confirmation"""
+			dialog.destroy()
+			self.progress_label.configure(text="Downloading update...")
+			success = self.update_handler.perform_update(download_url)
+			if success:
+				self.destroy()
 
         # Main container
         self.main_frame = CTkFrame(master=self, corner_radius=6)

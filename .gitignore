@@ -1,2 +1,3 @@
 venv
-ffmpeg
+src/ffmpeg/ffmpeg.exe
+src/ffmpeg/ffprobe.exe

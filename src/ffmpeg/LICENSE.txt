@@ -1,0 +1,11 @@
+This application bundles FFmpeg binaries, which are licensed under the 
+GNU Lesser General Public License (LGPL) version 2.1 or later.
+
+The FFmpeg source code can be obtained from:
+https://ffmpeg.org/
+
+Full license text available at:
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+
+The included FFmpeg binaries are unmodified builds from:
+https://www.gyan.dev/ffmpeg/builds/

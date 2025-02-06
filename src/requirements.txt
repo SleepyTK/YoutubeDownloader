@@ -27,3 +27,7 @@ setuptools==75.8.0
 uritemplate==4.1.1
 urllib3==2.3.0
 yt-dlp==2025.1.26
+requests==2.32.3
+rsa==4.9
+packaging==24.2
+pywin32==308
