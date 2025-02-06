@@ -14,7 +14,7 @@ from pytube import Search
 class UpdateHandler:
 	def __init__(self):
 		self.current_version = self.get_current_version()
-		self.repo_owner = "SleepTK"
+		self.repo_owner = "SleepyTK"
 		self.repo_name = "YoutubeDownloader"
 		self.exe_name = "YouTube_Downloader.exe"
 
