@@ -22,22 +22,22 @@ jobs:
         New-Item -Path "src/ffmpeg" -ItemType Directory -Force
         
         # Download and extract FFmpeg
-        Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z" -OutFile "ffmpeg.7z"
-        7z x ffmpeg.7z -o"src/ffmpeg"
+        Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z" -OutFile ffmpeg.7z
+        7z x ffmpeg.7z -osrc/ffmpeg
         
-        # Move binaries to correct location
-        Move-Item -Path "src/ffmpeg/ffmpeg.exe" -Destination "src/ffmpeg/" -Force
-        Move-Item -Path "src/ffmpeg/ffprobe.exe" -Destination "src/ffmpeg/" -Force
+        # Fix directory structure (critical change)
+        Get-ChildItem -Path src/ffmpeg -Recurse | Where-Object { $_.Name -match 'ffmpeg\.exe' } | Move-Item -Destination src/ffmpeg -Force
+        Get-ChildItem -Path src/ffmpeg -Recurse | Where-Object { $_.Name -match 'ffprobe\.exe' } | Move-Item -Destination src/ffmpeg -Force
 
-    - name: Set up Python 3.13
+    - name: Set up Python 3.10  # Changed from 3.13
       uses: actions/setup-python@v4
       with:
-        python-version: '3.13'
+        python-version: '3.10'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r src/requirements.txt
 
     - name: Build executable
       run: |
@@ -49,6 +49,8 @@ jobs:
           --hidden-import "pkg_resources.py2_warn" `
           --hidden-import "pkg_resources" `
           --hidden-import "pywin32" `
+          --hidden-import "tkinter" `
+          --hidden-import "customtkinter" `
           "src/main.py"
 
     - name: Create Release
