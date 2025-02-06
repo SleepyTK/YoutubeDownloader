@@ -27,6 +27,9 @@ jobs:
         
         Get-ChildItem -Path src/ffmpeg -Recurse | Where-Object { $_.Name -match 'ffmpeg\.exe' } | Move-Item -Destination src/ffmpeg -Force
         Get-ChildItem -Path src/ffmpeg -Recurse | Where-Object { $_.Name -match 'ffprobe\.exe' } | Move-Item -Destination src/ffmpeg -Force
+        Get-ChildItem -Path src/ffmpeg -Recurse
+        Test-Path src/ffmpeg/ffmpeg.exe
+        Test-Path src/ffmpeg/ffprobe.exe
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
