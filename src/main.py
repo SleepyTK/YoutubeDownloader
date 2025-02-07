@@ -10,7 +10,7 @@ from pytube import Search
 def detect_gpu(ffmpeg_path):
 	try:
 		result = subprocess.run([ffmpeg_path, '-hide_banner', '-encoders'], 
-							  capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+								capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
 		encoders = result.stdout.lower()
 		if 'nvenc' in encoders or 'cuda' in encoders:
 			return 'nvidia'
@@ -45,29 +45,29 @@ class UpdateHandler:
 		version_file = base_path / "version.txt"
 		return version_file.read_text().strip()
 
-  def check_update(self):
-      try:
-          response = requests.get(
-              f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/releases/latest",
-              timeout=5
-          )
-          if response.status_code == 200:
-              latest_data = response.json()
-              latest_version_str = latest_data['tag_name']
-              # Remove the 'v' prefix if present
-              latest_version = version.parse(latest_version_str.lstrip('v'))
-              current_version = version.parse(self.current_version)
-              print(f"Current Version: {current_version}")
-              print(f"Latest Version: {latest_version}")
-              
-              if latest_version > current_version:
-                  return {
-                      'url': latest_data['assets'][0]['browser_download_url'],
-                      'version': latest_version_str
-                  }
-      except Exception as e:
-          logging.error(f"Update check failed: {e}")
-      return None
+	def check_update(self):
+		try:
+			response = requests.get(
+				f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/releases/latest",
+				timeout=5
+			)
+			if response.status_code == 200:
+				latest_data = response.json()
+				latest_version_str = latest_data['tag_name']
+				# Remove the 'v' prefix if present
+				latest_version = version.parse(latest_version_str.lstrip('v'))
+				current_version = version.parse(self.current_version)
+				print(f"Current Version: {current_version}")
+				print(f"Latest Version: {latest_version}")
+				
+				if latest_version > current_version:
+					return {
+						'url': latest_data['assets'][0]['browser_download_url'],
+						'version': latest_version_str
+					}
+		except Exception as e:
+			logging.error(f"Update check failed: {e}")
+		return None
 
 	def perform_update(self, download_url):
 		"""Download and replace EXE"""
@@ -105,7 +105,7 @@ class App(CTk):
 		self.attributes('-topmost', True)
 		self.my_font = CTkFont(family="System", weight="bold")
 		set_default_color_theme("green")
-    
+		
 		# FFmpeg path detection
 		try:
 			base_path = Path(sys._MEIPASS)
@@ -277,7 +277,7 @@ class App(CTk):
 		self.link_entry.bind("<Return>", lambda event: self.add_link())
 		self.links = []
 		self.link_rows = []
-    
+		
 		self.update_handler = UpdateHandler()
 		self.check_for_updates()
 
