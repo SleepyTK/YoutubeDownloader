@@ -409,23 +409,6 @@ class App(CTk):
 			self.after(0, lambda: self.progress_label.configure(text=f"FFmpeg error: {str(e)}"))
 			return
 
-		try:
-			result = subprocess.run(
-				[self.ffmpeg_path, '-version'],
-				capture_output=True,
-				text=True,
-				creationflags=subprocess.CREATE_NO_WINDOW
-			)
-			
-			if result.returncode != 0:
-				raise Exception("FFmpeg test failed")
-		except Exception as e:
-			error_msg = str(e)
-			self.after(0, lambda msg=error_msg: self.progress_label.configure(
-				text=f"FFmpeg verification failed: {msg}"
-			))
-			return
-
 		total = len(self.links)
 		for index, link in enumerate(self.links, 1):
 			try:
@@ -464,7 +447,7 @@ class App(CTk):
 							'-c:v', 'libx264',
 							'-preset', 'fast',
 							'-crf', '23',
-							'-b:v', '3M',
+							'-b:v', '5M',
 							'-pix_fmt', 'yuv420p',
 							'-movflags', '+faststart'
 						],
@@ -473,7 +456,7 @@ class App(CTk):
 							'-preset', 'p6',
 							'-rc', 'vbr',
 							'-cq', '23',
-							'-b:v', '3M',
+							'-b:v', '5M',
 							'-maxrate', '10M',
 							'-profile:v', 'main',
 							'-pix_fmt', 'yuv420p'
@@ -482,7 +465,7 @@ class App(CTk):
 							'-c:v', 'h264_amf',
 							'-usage', 'transcoding',
 							'-quality', 'balanced',
-							'-b:v', '3M',
+							'-b:v', '5M',
 							'-maxrate', '10M',
 							'-profile:v', 'main',
 							'-pix_fmt', 'yuv420p'
@@ -491,7 +474,7 @@ class App(CTk):
 							'-c:v', 'h264_qsv',
 							'-preset', 'fast',
 							'-global_quality', '23',
-							'-b:v', '3M',
+							'-b:v', '5M',
 							'-maxrate', '10M',
 							'-profile:v', 'main',
 							'-pix_fmt', 'yuv420p'
