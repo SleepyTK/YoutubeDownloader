@@ -74,6 +74,8 @@ class UpdateHandler:
 		try:
 			temp_exe = Path(os.environ['TEMP']) / "update_temp.exe"
 			response = requests.get(download_url)
+			if response.status_code != 200:
+				raise Exception(f"Download failed with status {response.status_code}")
 			temp_exe.write_bytes(response.content)
 
 			bat_script = f"""@echo off
