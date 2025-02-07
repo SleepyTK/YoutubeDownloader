@@ -78,12 +78,15 @@ class UpdateHandler:
 				raise Exception(f"Download failed with status {response.status_code}")
 			temp_exe.write_bytes(response.content)
 
-			bat_script = f"""@echo off
-			timeout /t 1 /nobreak >nul
-			del /F /Q "{sys.executable}"
-			move /Y "{temp_exe}" "{sys.executable}"
-			start "" "{sys.executable}"
-			del %0"""
+			import textwrap
+			bat_script = textwrap.dedent(f"""\
+				@echo off
+				timeout /t 1 /nobreak >nul
+				del /F /Q "{sys.executable}"
+				move /Y "{temp_exe}" "{sys.executable}"
+				start "" "{sys.executable}"
+				del %0
+				""")
 
 			script_path = Path(os.environ['TEMP']) / "updater.bat"
 			script_path.write_text(bat_script)
@@ -101,7 +104,7 @@ class UpdateHandler:
 class App(CTk):
 	def __init__(self):
 		super().__init__()
-		self.title("YouTube Downloader v1.0.1")
+		self.title("YouTube Downloader v1.0.0")
 		self.geometry("885x450")
 		self.resizable(0, 0)
 		self.attributes('-topmost', True)
