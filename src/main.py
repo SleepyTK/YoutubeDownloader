@@ -45,25 +45,29 @@ class UpdateHandler:
 		version_file = base_path / "version.txt"
 		return version_file.read_text().strip()
 
-	def check_update(self):
-		"""Check GitHub releases for new version"""
-		try:
-			response = requests.get(
-				f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/releases/latest",
-				timeout=5
-			)
-			if response.status_code == 200:
-				latest_data = response.json()
-				latest_version = latest_data['tag_name'].lstrip('v')
-				
-				if version.parse(latest_version) > version.parse(self.current_version):
-					return {
-						'url': latest_data['assets'][0]['browser_download_url'],
-						'version': latest_version
-					}
-		except Exception as e:
-			print(f"Update check failed: {e}")
-		return None
+  def check_update(self):
+      try:
+          response = requests.get(
+              f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/releases/latest",
+              timeout=5
+          )
+          if response.status_code == 200:
+              latest_data = response.json()
+              latest_version_str = latest_data['tag_name']
+              # Remove the 'v' prefix if present
+              latest_version = version.parse(latest_version_str.lstrip('v'))
+              current_version = version.parse(self.current_version)
+              print(f"Current Version: {current_version}")
+              print(f"Latest Version: {latest_version}")
+              
+              if latest_version > current_version:
+                  return {
+                      'url': latest_data['assets'][0]['browser_download_url'],
+                      'version': latest_version_str
+                  }
+      except Exception as e:
+          logging.error(f"Update check failed: {e}")
+      return None
 
 	def perform_update(self, download_url):
 		"""Download and replace EXE"""
@@ -95,7 +99,7 @@ class UpdateHandler:
 class App(CTk):
 	def __init__(self):
 		super().__init__()
-		self.title("YouTube Downloader with Search")
+		self.title("YouTube Downloader v1.0.1")
 		self.geometry("885x450")
 		self.resizable(0, 0)
 		self.attributes('-topmost', True)
