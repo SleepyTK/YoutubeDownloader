@@ -1,7 +1,7 @@
 import sys, re, os, subprocess, requests, uuid, logging
 from packaging import version
 from pathlib import Path
-from customtkinter import set_default_color_theme, CTk, CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkScrollableFrame, CTkProgressBar, CTkOptionMenu, CTkFont
+from customtkinter import set_default_color_theme, CTk, CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkScrollableFrame, CTkProgressBar, CTkOptionMenu, CTkFont, CTkToplevel
 from tkinter import filedialog, messagebox
 import yt_dlp
 import threading
@@ -99,7 +99,7 @@ class UpdateHandler:
 class App(CTk):
 	def __init__(self):
 		super().__init__()
-		self.title("YouTube Downloader v1.0.2")
+		self.title("YouTube Downloader v1.0.0")
 		self.geometry("885x450")
 		self.resizable(0, 0)
 		self.attributes('-topmost', True)
@@ -296,15 +296,15 @@ class App(CTk):
 		"""CTk update dialog"""
 		dialog = CTkToplevel(self)
 		dialog.title("Update Available")
-		dialog.geometry("400x150")
+		dialog.geometry("200x175")
 		
 		CTkLabel(dialog, text=f"Version {update_info['version']} is available!\nUpdate now?").pack(pady=10)
 		
 		button_frame = CTkFrame(dialog)
 		button_frame.pack(pady=10)
 		
-		CTkButton(button_frame, text="Update Now", command=lambda: self.start_update(update_info['url'], dialog)).pack(side='left', padx=10)
-		CTkButton(button_frame, text="Later", command=dialog.destroy).pack(side='right', padx=10)
+		CTkButton(button_frame, text="Update Now", command=lambda: self.start_update(update_info['url'], dialog)).pack(side='top', padx=10, pady=10)
+		CTkButton(button_frame, text="Later", command=dialog.destroy).pack(side='bottom', padx=10, pady=10)
 		
 		dialog.after(100, lambda: dialog.attributes('-topmost', True))
 		dialog.mainloop()
