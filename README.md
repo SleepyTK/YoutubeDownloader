@@ -22,4 +22,4 @@ The app will automatically prompt you when updates are available.
 This software bundles FFmpeg binaries licensed under [LGPL v2.1](src/ffmpeg/LICENSE.txt).
 
 ## Support
-For issues, [open a GitHub ticket](your-repo-url/issues).
+For issues, [open a GitHub ticket](https://github.com/SleepyTK/YoutubeDownloader/issues).
