@@ -105,7 +105,7 @@ class App(CTk):
 		self.attributes('-topmost', True)
 		self.my_font = CTkFont(family="System", weight="bold")
 		set_default_color_theme("green")
-  
+    
 		# FFmpeg path detection
 		try:
 			base_path = Path(sys._MEIPASS)
@@ -277,7 +277,7 @@ class App(CTk):
 		self.link_entry.bind("<Return>", lambda event: self.add_link())
 		self.links = []
 		self.link_rows = []
-  
+    
 		self.update_handler = UpdateHandler()
 		self.check_for_updates()
 
