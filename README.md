@@ -1,6 +1,6 @@
 # YouTube Downloader
 
-[Youtube Downloader v1.0.0](images/YoutubeDownloaderv1.0.0.png)
+<img src="images/YoutubeDownloaderv1.0.0.png" width="400" alt="Youtube Downloader v1.0.0">
 
 ## Features
 - Download videos/audio from YouTube
