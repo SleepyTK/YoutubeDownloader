@@ -1,4 +1,3 @@
-# W.I.P NOT ALL FEATURES ARE INPLEMENTED YET
 # YouTube Downloader
 
 ## Features
@@ -26,4 +25,4 @@ For issues, [open a GitHub ticket](https://github.com/SleepyTK/YoutubeDownloader
 
 ## Notes
 - This program is constantly in development and will have bugs.
-- the exe will be blocked by antivirus scanners like McAfee, so you will have to tinker a bit until I get the program certified
+- the exe might get blocked by antivirus scanners like McAfee, so you will have to tinker a bit until I get the program certified
