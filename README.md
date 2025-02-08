@@ -23,3 +23,7 @@ This software bundles FFmpeg binaries licensed under [LGPL v2.1](src/ffmpeg/LICE
 
 ## Support
 For issues, [open a GitHub ticket](https://github.com/SleepyTK/YoutubeDownloader/issues).
+
+## Notes
+- This program is constantly in development and will have bugs.
+- the exe will be blocked by antivirus scanners like McAfee, so you will have to tinker a bit until I get the program certified
