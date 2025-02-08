@@ -1,11 +1,8 @@
-import sys, re, os, subprocess, requests, uuid, logging
+import sys, re, os, subprocess, requests, uuid, logging, time, threading, yt_dlp, queue
 from packaging import version
 from pathlib import Path
 from customtkinter import set_default_color_theme, CTk, CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkScrollableFrame, CTkProgressBar, CTkOptionMenu, CTkFont, CTkToplevel
-from tkinter import filedialog, messagebox
-import yt_dlp
-import threading
-from pytube import Search
+from tkinter import filedialog, messagebox, StringVar
 
 def detect_gpu(ffmpeg_path):
 	try:
@@ -110,6 +107,11 @@ class App(CTk):
 		self.attributes('-topmost', True)
 		self.my_font = CTkFont(family="System", weight="bold")
 		set_default_color_theme("green")
+  
+		self.search_queue = queue.Queue()
+		self.search_cache = {}
+		self.current_search_id = 0
+		self.last_search_time = 0
 		
 		# FFmpeg path detection
 		try:
@@ -323,32 +325,121 @@ class App(CTk):
 			self.destroy()
 
 	def perform_search(self):
-		query = self.search_entry.get()
-		if query:
+			query = self.search_entry.get().strip()
+			if not query:
+					self._clear_search_results()
+					return
+
+			self._show_loading()
+
+			if query in self.search_cache:
+					self._update_ui(self.search_cache[query])
+					return
+
+			self.current_search_id += 1
+			search_id = self.current_search_id
+			threading.Thread(
+					target=self._async_search,
+					args=(query, search_id),
+					daemon=True
+			).start()
+
+	def _async_search(self, query, search_id):
+			"""Background search with result validation"""
+			try:
+					ydl_opts = {
+							"quiet": True,
+							"extract_flat": "in_playlist",
+							"skip_download": True,
+							"ignoreerrors": True,
+							"noplaylist": True,
+							"extractor_args": {
+									"youtube": {
+											"skip": ["hls", "dash", "translated_subs"]
+									}
+							}
+					}
+
+					with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+							results = ydl.extract_info(f"ytsearch10:{query}", download=False)
+
+					if search_id == self.current_search_id:
+							self.search_cache[query] = results
+							self.search_queue.put(results)
+							self.after(0, self._process_search_results)
+							
+			except Exception as e:
+					print(f"Search error: {e}")
+					self.search_queue.put(None)
+					self.after(0, self._process_search_results)
+
+	def _process_search_results(self):
+			"""Handle results from the queue"""
+			try:
+					results = self.search_queue.get_nowait()
+					self._update_ui(results)
+			except queue.Empty:
+					pass
+
+	def _show_loading(self):
+			"""Display loading indicator"""
+			self._clear_search_results()
+			CTkLabel(
+					self.search_results_frame,
+					text="Searching...",
+					font=self.my_font
+			).pack(pady=10)
+
+	def _clear_search_results(self):
+			"""Safely clear previous results"""
 			for widget in self.search_results_frame.winfo_children():
-				widget.destroy()
-		
-			search = Search(query)
-			for video in search.results[:10]:
-				result_frame = CTkFrame(self.search_results_frame, corner_radius=0)
-				result_frame.pack(fill="x", padx=5, pady=2)
-				
-				CTkLabel(
-					result_frame,
-					text=video.title,
-					font=self.my_font,
-					wraplength=150
-				).pack(side="left", padx=5, pady=5)
-				
-				CTkButton(
-					result_frame,
-					text="ADD",
-					width=60,
-					corner_radius=0,
-					font=self.my_font,
-					command=lambda url=video.watch_url: self.add_link(url)
-				).pack(side="right", padx=5, pady=5)
-		
+					try:
+							widget.destroy()
+					except:
+							pass
+
+	def _update_ui(self, search_results):
+			"""Optimized UI update with widget recycling"""
+			self._clear_search_results()
+			
+			if not search_results or not search_results.get('entries'):
+					CTkLabel(
+							self.search_results_frame,
+							text="No results found.",
+							font=self.my_font
+					).pack(pady=10)
+					return
+
+			container = CTkFrame(self.search_results_frame)
+			container.pack(fill="both", expand=True)
+			
+			for video in search_results.get("entries", []):
+					if not video:
+							continue
+							
+					result_frame = CTkFrame(container, corner_radius=0)
+					result_frame.pack(fill="x", padx=5, pady=2, anchor="nw")
+
+					title_var = StringVar(value=video.get('title', 'Untitled'))
+					
+					CTkLabel(
+							result_frame,
+							textvariable=title_var,
+							font=self.my_font,
+							wraplength=150
+					).pack(side="left", padx=5, pady=5)
+
+					CTkButton(
+							result_frame,
+							text="ADD",
+							width=60,
+							corner_radius=0,
+							font=self.my_font,
+							command=lambda url=video.get('url'): self.add_link(url)
+					).pack(side="right", padx=5, pady=5)
+
+			self.search_results_frame.update_idletasks()
+
 	def get_available_encoders(self, ffmpeg_path):
 		encoders = ['libx264 (CPU)']
 		try:
