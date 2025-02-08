@@ -2,3 +2,4 @@ venv
 src/ffmpeg/ffmpeg.exe
 src/ffmpeg/ffprobe.exe
 src/test.py
+src/themes

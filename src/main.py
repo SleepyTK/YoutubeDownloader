@@ -173,7 +173,6 @@ class App(CTk):
 			height=240,
 			width=275,
 			text="No directory selected",
-			fg_color="#292929",
 			wraplength=275,
 			font=self.my_font
 		)
