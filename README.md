@@ -6,20 +6,16 @@
 - Download videos/audio from YouTube
 - Built-in search functionality
 - Auto-updates
-- No FFmpeg setup required
-- 2Mbps, 3Mbps, 4Mbps, 5Mbps, 6Mbps, 10Mbps
-- 360p, 480p, 720p, 1080p
+- No FFmpeg setup required (bundled with the app)
+- supports 2Mbps, 3Mbps, 4Mbps, 5Mbps, 6Mbps, 10Mbps bitrates
+- Supports 360p, 480p, 720p, 1080p video resolutions
 
 ## Installation
-1. Download latest release from [Releases page]
+1. Download latest release from [Releases page](https://github.com/SleepyTK/YoutubeDownloader/releases)
 2. Double-click `YouTube_Downloader.exe`
-
-## Updating
-The app will automatically prompt you when updates are available.
 
 ## Requirements
 - Windows 10/11
-- No FFmpeg installation needed
 
 ## Legal
 This software bundles FFmpeg binaries licensed under [LGPL v2.1](src/ffmpeg/LICENSE.txt).
@@ -28,17 +24,36 @@ This software bundles FFmpeg binaries licensed under [LGPL v2.1](src/ffmpeg/LICE
 For issues, [open a GitHub ticket](https://github.com/SleepyTK/YoutubeDownloader/issues).
 
 ## Notes
-- This program is constantly in development and will have bugs.
-- the exe might get blocked by antivirus scanners like McAfee, so you will have to tinker a bit until I get the program certified
+- This program is constantly in development and may contain bugs.
+- The EXE might get flagged by antivirus software (e.g., McAfee) due to the nature of video downloads. If this happens, you may need to adjust your antivirus settings temporarily while the program is being certified.
 
 ## Currently Working on
-- adding video thumbnail and length added to the video cards
+- Adding video thumbnails and duration to video cards in the application interface
 
+## Running the Python Code (Requires Python 3.10 or Higher)
 
-## If you want to run the python code instead of downloading the exe (python installation 3.10 or higher required)
-1. Clone the repository
-2. Download ffmpeg from [ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z) and move ffmpeg.exe & ffprobe.exe into the 'src/ffmpeg' folder
-3. make a virtual environment in the root folder by running this command in your root: "python -m venv venv"
-4. Start the virtual environment by running this command in your root: "venv/Scripts/Activate"
-5. install all the dependencies by running this command in your root: "pip install -r scr/requirements.txt"
-6. try running the program by running this command in your root: "python src/main.py"
+If you'd like to run the Python version of the application instead of downloading the EXE, follow these steps:
+
+1. **Clone the repository**  
+   Clone this repository to your local machine using the following command:
+   git clone https://github.com/SleepyTK/YoutubeDownloader.git
+
+2. **Download FFmpeg**  
+    Download FFmpeg from [this link](https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z).  
+    After downloading, extract the files and move `ffmpeg.exe` and `ffprobe.exe` into the `src/ffmpeg` folder of your project.
+
+3. **Create a Virtual Environment**  
+    In the root folder of the project, create a virtual environment by running:
+    python -m venv venv
+
+4. **Activate the Virtual Environment**  
+    Activate the virtual environment by running:
+    venv\Scripts\Activate
+
+5. **Install Dependencies**  
+    Install the required dependencies by running:
+    pip install -r src/requirements.txt
+
+6. **Run the Program**  
+    Finally, run the program using:
+    python src/main.py
