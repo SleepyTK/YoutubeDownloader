@@ -128,7 +128,7 @@ class App(CTk):
 	"""Main application window."""
 	def __init__(self):
 		super().__init__()
-		self.title("YouTube Downloader v1.0.1")
+		self.title("YouTube Downloader v1.0.2")
 		self.geometry("885x450")
 		self.resizable(0, 0)
 		self.attributes('-topmost', True)
@@ -272,6 +272,18 @@ class App(CTk):
 		)
 		self.resolution_menu.set("720p")
 		self.resolution_menu.place(x=438, y=380)
+  
+		self.bitrate_menu = CTkOptionMenu(
+			master=self.main_frame,
+			values=["10Mpbs", "6Mbps", "5Mbps", "4Mbps", "3Mbps", "2Mbps"],
+			height=30,
+			width=135,
+			corner_radius=0,
+			font=self.my_font,
+			dropdown_font=self.my_font
+		)
+		self.bitrate_menu.set("5Mbps")
+		self.bitrate_menu.place(x=295, y=380)
 
 		self.video_button = CTkButton(
 			master=self.main_frame,
@@ -287,7 +299,7 @@ class App(CTk):
 		self.progress_bar = CTkProgressBar(
 			master=self.main_frame,
 			orientation="horizontal",
-			width=420,
+			width=275,
 			height=30,
 			corner_radius=0
 		)
@@ -319,8 +331,7 @@ class App(CTk):
 			except Exception as e:
 				print(f"Update check error: {e}")
 		threading.Thread(target=update_check, daemon=True).start()
-	
-	
+
 	def show_update_prompt(self, update_info):
 		"""shows the update prompt to the user"""
 		dialog = CTkToplevel(self)
@@ -531,6 +542,8 @@ class App(CTk):
 
 	def process_downloads(self, media_type):
 		"""goes through all the links you've added and downloads them either as mp3 or mp4"""
+		self.video_button.configure(state="disabled")
+		self.audio_button.configure(state="disabled")
 		self.after(0, lambda: self.progress_label.configure(text="Initializing..."))
 		
 		if not os.path.isfile(self.ffmpeg_path):
@@ -575,6 +588,8 @@ class App(CTk):
 					})
 				else:
 					res = int(self.resolution_menu.get()[:-1])
+					bit = str(self.bitrate_menu.get()[:-3])
+					print(f"BITRATE MENU SELECTION: {bit}")
 					encoder = self.encoder_menu.get().split(' ')[0]
 					
 					encoder_args = {
@@ -582,7 +597,7 @@ class App(CTk):
 							'-c:v', 'libx264',
 							'-preset', 'fast',
 							'-crf', '23',
-							'-b:v', '5M',
+							'-b:v', f'{bit}',
 							'-pix_fmt', 'yuv420p',
 							'-movflags', '+faststart'
 						],
@@ -591,7 +606,7 @@ class App(CTk):
 							'-preset', 'p6',
 							'-rc', 'vbr',
 							'-cq', '23',
-							'-b:v', '5M',
+							'-b:v', f'{bit}',
 							'-maxrate', '10M',
 							'-profile:v', 'main',
 							'-pix_fmt', 'yuv420p'
@@ -600,7 +615,7 @@ class App(CTk):
 							'-c:v', 'h264_amf',
 							'-usage', 'transcoding',
 							'-quality', 'balanced',
-							'-b:v', '5M',
+							'-b:v', f'{bit}',
 							'-maxrate', '10M',
 							'-profile:v', 'main',
 							'-pix_fmt', 'yuv420p'
@@ -609,7 +624,7 @@ class App(CTk):
 							'-c:v', 'h264_qsv',
 							'-preset', 'fast',
 							'-global_quality', '23',
-							'-b:v', '5M',
+							'-b:v', f'{bit}',
 							'-maxrate', '10M',
 							'-profile:v', 'main',
 							'-pix_fmt', 'yuv420p'
@@ -649,6 +664,8 @@ class App(CTk):
 				self.update_overall_progress(index/total, index, total)
 
 		self.after(0, self.clear_links)
+		self.video_button.configure(state="normal")
+		self.audio_button.configure(state="normal")
 
 	def update_progress(self, data):
 		"""updates the progress bar for the user to see the progress of the downloads"""
