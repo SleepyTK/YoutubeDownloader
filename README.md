@@ -36,7 +36,7 @@ If you'd like to run the Python version of the application instead of downloadin
 
 1. **Clone the repository**  
    Clone this repository to your local machine using the following command:
-   git clone https://github.com/SleepyTK/YoutubeDownloader.git
+   `git clone https://github.com/SleepyTK/YoutubeDownloader.git`
 
 2. **Download FFmpeg**  
     Download FFmpeg from [this link](https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z).  
@@ -44,16 +44,16 @@ If you'd like to run the Python version of the application instead of downloadin
 
 3. **Create a Virtual Environment**  
     In the root folder of the project, create a virtual environment by running:
-    python -m venv venv
+    `python -m venv venv`
 
 4. **Activate the Virtual Environment**  
     Activate the virtual environment by running:
-    venv\Scripts\Activate
+    `venv\Scripts\Activate`
 
 5. **Install Dependencies**  
     Install the required dependencies by running:
-    pip install -r src/requirements.txt
+    `pip install -r src/requirements.txt`
 
 6. **Run the Program**  
     Finally, run the program using:
-    python src/main.py
+    `python src/main.py`
