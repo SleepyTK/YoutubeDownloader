@@ -1,31 +1,56 @@
-import sys, re, os, subprocess, requests, uuid, logging, time, threading, yt_dlp, queue
+import sys
+import re
+import os
+import subprocess
+import requests
+import uuid
+import logging
+import time
+import threading
+import yt_dlp
+import queue
 from packaging import version
 from pathlib import Path
-from customtkinter import set_default_color_theme, CTk, CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkScrollableFrame, CTkProgressBar, CTkOptionMenu, CTkFont, CTkToplevel
+from customtkinter import (
+	set_default_color_theme, CTk, CTkFrame, CTkLabel, CTkButton,
+	CTkEntry, CTkScrollableFrame, CTkProgressBar, CTkOptionMenu,
+	CTkFont, CTkToplevel
+)
 from tkinter import filedialog, messagebox, StringVar
 
 def detect_gpu(ffmpeg_path):
+	"""Detects the available GPU and returns its type."""
 	try:
-		result = subprocess.run([ffmpeg_path, '-hide_banner', '-encoders'], 
-								capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+		result = subprocess.run(
+			[ffmpeg_path, '-hide_banner', '-encoders'],
+			capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW
+		)
 		encoders = result.stdout.lower()
-		if 'nvenc' in encoders or 'cuda' in encoders:
-			return 'nvidia'
-		if 'amf' in encoders or 'amd' in encoders:
+
+		if 'amf' in encoders or 'h264_amf' in encoders or 'hevc_amf' in encoders:
+			print("Detected GPU: AMD")
 			return 'amd'
-		if 'qsv' in encoders or 'intel' in encoders:
+		if 'nvenc' in encoders or 'cuda' in encoders:
+			print("Detected GPU: NVIDIA")
+			return 'nvidia'
+		if 'qsv' in encoders or 'h264_qsv' in encoders or 'hevc_qsv' in encoders:
+			print("Detected GPU: Intel")
 			return 'intel'
+
+		print("No GPU encoder found, defaulting to CPU")
 		return 'cpu'
 	except Exception as e:
 		print(f"GPU detection error: {str(e)}")
 		return 'cpu'
 
 def sanitize_filename(filename):
+	"""Sanitizes a filename by removing invalid characters and limiting length."""
 	filename = re.sub(r'[\\/*?:"<>|]', '', filename)
 	filename = filename.encode('ascii', 'ignore').decode('ascii')
 	return filename.strip()[:120]
 
 class UpdateHandler:
+	"""Handles application updates by checking and downloading the latest version."""
 	def __init__(self):
 		self.current_version = self.get_current_version()
 		self.repo_owner = "SleepyTK"
@@ -33,7 +58,7 @@ class UpdateHandler:
 		self.exe_name = "YouTube_Downloader.exe"
 
 	def get_current_version(self):
-		"""Get version from bundled file"""
+		"""Gets the current version from the version file."""
 		try:
 			base_path = Path(sys._MEIPASS)
 		except AttributeError:
@@ -43,6 +68,7 @@ class UpdateHandler:
 		return version_file.read_text().strip()
 
 	def check_update(self):
+		"""Checks for updates by querying the GitHub API."""
 		try:
 			response = requests.get(
 				f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/releases/latest",
@@ -51,7 +77,6 @@ class UpdateHandler:
 			if response.status_code == 200:
 				latest_data = response.json()
 				latest_version_str = latest_data['tag_name']
-				# Remove the 'v' prefix if present
 				latest_version = version.parse(latest_version_str.lstrip('v'))
 				current_version = version.parse(self.current_version)
 				print(f"Current Version: {current_version}")
@@ -67,7 +92,7 @@ class UpdateHandler:
 		return None
 
 	def perform_update(self, download_url):
-		"""Download and replace EXE"""
+		"""Downloads and replaces the current executable with the latest version."""
 		try:
 			temp_exe = Path(os.environ['TEMP']) / "update_temp.exe"
 			response = requests.get(download_url)
@@ -76,14 +101,14 @@ class UpdateHandler:
 			temp_exe.write_bytes(response.content)
 
 			import textwrap
-			bat_script = textwrap.dedent(f"""\
+			bat_script = textwrap.dedent(f"""
 				@echo off
 				timeout /t 1 /nobreak >nul
 				del /F /Q "{sys.executable}"
 				move /Y "{temp_exe}" "{sys.executable}"
 				start "" "{sys.executable}"
 				del %0
-				""")
+			""")
 
 			script_path = Path(os.environ['TEMP']) / "updater.bat"
 			script_path.write_text(bat_script)
@@ -98,7 +123,9 @@ class UpdateHandler:
 			messagebox.showerror("Update Error", f"Failed to update: {str(e)}")
 			return False
 
+
 class App(CTk):
+	"""Main application window."""
 	def __init__(self):
 		super().__init__()
 		self.title("YouTube Downloader v1.0.0")
@@ -107,13 +134,12 @@ class App(CTk):
 		self.attributes('-topmost', True)
 		self.my_font = CTkFont(family="System", weight="bold")
 		set_default_color_theme("green")
-  
+		
 		self.search_queue = queue.Queue()
 		self.search_cache = {}
 		self.current_search_id = 0
 		self.last_search_time = 0
-		
-		# FFmpeg path detection
+			
 		try:
 			base_path = Path(sys._MEIPASS)
 		except AttributeError:
@@ -121,9 +147,6 @@ class App(CTk):
 
 		self.ffmpeg_path = str(base_path / 'ffmpeg' / 'ffmpeg.exe')
 		self.ffprobe_path = str(base_path / 'ffmpeg' / 'ffprobe.exe')
-
-		print(f"FFmpeg path: {self.ffmpeg_path}")
-		print(f"FFmpeg exists: {os.path.exists(self.ffmpeg_path)}")
 		
 		try:
 			result = subprocess.run(
@@ -288,7 +311,7 @@ class App(CTk):
 		self.check_for_updates()
 
 	def check_for_updates(self):
-		"""Non-blocking update check"""
+		"""checks if there's an actual update for the update prompt to show"""
 		def update_check():
 			try:
 				if update_info := self.update_handler.check_update():
@@ -299,7 +322,7 @@ class App(CTk):
 	
 	
 	def show_update_prompt(self, update_info):
-		"""CTk update dialog"""
+		"""shows the update prompt to the user"""
 		dialog = CTkToplevel(self)
 		dialog.title("Update Available")
 		dialog.geometry("200x175")
@@ -316,7 +339,7 @@ class App(CTk):
 		dialog.mainloop()
 
 	def start_update(self, download_url, dialog):
-		"""Handle update confirmation"""
+		"""Gets rid of the update prompt and starts the update"""
 		dialog.destroy()
 		self.progress_label.configure(text="Downloading update...")
 		success = self.update_handler.perform_update(download_url)
@@ -324,6 +347,7 @@ class App(CTk):
 			self.destroy()
 
 	def perform_search(self):
+			"""starts searching youtube based on your search"""
 			query = self.search_entry.get().strip()
 			if not query:
 					self._clear_search_results()
@@ -344,126 +368,135 @@ class App(CTk):
 			).start()
 
 	def _async_search(self, query, search_id):
-			"""Background search with result validation"""
-			try:
-					ydl_opts = {
-							"quiet": True,
-							"extract_flat": "in_playlist",
-							"skip_download": True,
-							"ignoreerrors": True,
-							"noplaylist": True,
-							"extractor_args": {
-									"youtube": {
-											"skip": ["hls", "dash", "translated_subs"]
-									}
-							}
-					}
+		"""searches meta data of videos"""
+		try:
+				ydl_opts = {
+						"quiet": True,
+						"extract_flat": "in_playlist",
+						"skip_download": True,
+						"ignoreerrors": True,
+						"noplaylist": True,
+						"extractor_args": {
+								"youtube": {
+										"skip": ["hls", "dash", "translated_subs"]
+								}
+						}
+				}
 
-					with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-							results = ydl.extract_info(f"ytsearch10:{query}", download=False)
+				with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+						results = ydl.extract_info(f"ytsearch10:{query}", download=False)
 
-					if search_id == self.current_search_id:
-							self.search_cache[query] = results
-							self.search_queue.put(results)
-							self.after(0, self._process_search_results)
-							
-			except Exception as e:
-					print(f"Search error: {e}")
-					self.search_queue.put(None)
-					self.after(0, self._process_search_results)
+				if search_id == self.current_search_id:
+						self.search_cache[query] = results
+						self.search_queue.put(results)
+						self.after(0, self._process_search_results)
+						
+		except Exception as e:
+				print(f"Search error: {e}")
+				self.search_queue.put(None)
+				self.after(0, self._process_search_results)
 
 	def _process_search_results(self):
-			"""Handle results from the queue"""
-			try:
-					results = self.search_queue.get_nowait()
-					self._update_ui(results)
-			except queue.Empty:
-					pass
+		"""processes the search results from async search and sends them to update ui"""
+		try:
+				results = self.search_queue.get_nowait()
+				self._update_ui(results)
+		except queue.Empty:
+				pass
 
 	def _show_loading(self):
-			"""Display loading indicator"""
-			self._clear_search_results()
-			CTkLabel(
-					self.search_results_frame,
-					text="Searching...",
-					font=self.my_font
-			).pack(pady=10)
+		"""shows a label to show the user that the program is searching videos"""
+		self._clear_search_results()
+		CTkLabel(
+			self.search_results_frame,
+			text="Searching...",
+			font=self.my_font
+		).pack(pady=10)
 
 	def _clear_search_results(self):
-			"""Safely clear previous results"""
-			for widget in self.search_results_frame.winfo_children():
-					try:
-							widget.destroy()
-					except:
-							pass
+		"""clears any widgets in the search results window"""
+		for widget in self.search_results_frame.winfo_children():
+			try:
+				widget.destroy()
+			except:
+				pass
 
 	def _update_ui(self, search_results):
-			"""Optimized UI update with widget recycling"""
-			self._clear_search_results()
-			
-			if not search_results or not search_results.get('entries'):
-					CTkLabel(
-							self.search_results_frame,
-							text="No results found.",
-							font=self.my_font
-					).pack(pady=10)
-					return
+		"""updates the ui with the search results it got from process search results"""
+		self._clear_search_results()
+		
+		if not search_results or not search_results.get('entries'):
+				CTkLabel(
+						self.search_results_frame,
+						text="No results found.",
+						font=self.my_font
+				).pack(pady=10)
+				return
 
-			container = CTkFrame(self.search_results_frame)
-			container.pack(fill="both", expand=True)
-			
-			for video in search_results.get("entries", []):
-					if not video:
-							continue
-							
-					result_frame = CTkFrame(container, corner_radius=0)
-					result_frame.pack(fill="x", padx=5, pady=2, anchor="nw")
+		container = CTkFrame(self.search_results_frame)
+		container.pack(fill="both", expand=True)
+		
+		for video in search_results.get("entries", []):
+				if not video:
+						continue
+						
+				result_frame = CTkFrame(container, corner_radius=0)
+				result_frame.pack(fill="x", padx=5, pady=2, anchor="nw")
 
-					title_var = StringVar(value=video.get('title', 'Untitled'))
-					
-					CTkLabel(
-							result_frame,
-							textvariable=title_var,
-							font=self.my_font,
-							wraplength=150
-					).pack(side="left", padx=5, pady=5)
+				title_var = StringVar(value=video.get('title', 'Untitled'))
+				
+				CTkLabel(
+						result_frame,
+						textvariable=title_var,
+						font=self.my_font,
+						wraplength=150
+				).pack(side="left", padx=5, pady=5)
 
-					CTkButton(
-							result_frame,
-							text="ADD",
-							width=60,
-							corner_radius=0,
-							font=self.my_font,
-							command=lambda url=video.get('url'): self.add_link(url)
-					).pack(side="right", padx=5, pady=5)
+				CTkButton(
+						result_frame,
+						text="ADD",
+						width=60,
+						corner_radius=0,
+						font=self.my_font,
+						command=lambda url=video.get('url'): self.add_link(url)
+				).pack(side="right", padx=5, pady=5)
 
-			self.search_results_frame.update_idletasks()
+		self.search_results_frame.update_idletasks()
 
 	def get_available_encoders(self, ffmpeg_path):
-		encoders = ['libx264 (CPU)']
-		try:
-			result = subprocess.run([ffmpeg_path, '-hide_banner', '-encoders'], 
-								capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-			encoder_output = result.stdout.lower()
+   		"""checks what encoders are available and what gpu you have to return the available encoders"""
+			encoders = ['libx264 (CPU)']
+			detected_gpu = detect_gpu(ffmpeg_path)
+			print(f"GPU Detected: {detected_gpu}")
 
-			if 'nvenc' in encoder_output:
-				encoders.extend(['h264_nvenc (NVIDIA)', 'hevc_nvenc (NVIDIA)'])
-			if 'amf' in encoder_output:
-				encoders.append('h264_amf (AMD)')
-			if 'qsv' in encoder_output:
-				encoders.append('h264_qsv (Intel)')
+			try:
+				result = subprocess.run([ffmpeg_path, '-hide_banner', '-encoders'], 
+																capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+				encoder_output = result.stdout.lower()
+		
+				print(f"Available Encoders from FFmpeg:\n{encoder_output}")
 
-		except Exception as e:
-			print(f"Encoder detection error: {str(e)}")
-		return encoders
+				if 'nvenc' in encoder_output and detected_gpu == 'nvidia':
+					encoders.extend(['h264_nvenc (NVIDIA)', 'hevc_nvenc (NVIDIA)'])
+				if 'amf' in encoder_output and detected_gpu == 'amd':
+					encoders.append('h264_amf (AMD)')
+				if 'qsv' in encoder_output and detected_gpu == 'intel':
+					encoders.append('h264_qsv (Intel)')
+
+			except Exception as e:
+				print(f"Encoder detection error: {str(e)}")
+			print(f"Final Encoder List: {encoders}")
+			return encoders
 
 	def select_directory(self):
+		"""Here the user can select a directory to download the files to"""
 		directory = filedialog.askdirectory()
 		if directory:
 			self.directory_label.configure(text=f"Save Location: {directory}")
 			self.download_directory = directory
 
 	def add_link(self, url=None):
+		"""puts the links into the link list"""
 		link = url or self.link_entry.get()
 		if link:
 			self.links.append(link)
@@ -482,12 +515,14 @@ class App(CTk):
 				self.link_entry.delete(0, "end")
 
 	def remove_link(self, link, row):
+		"""removes the link from the links list"""
 		if link in self.links:
 			self.links.remove(link)
 		row.destroy()
 		self.link_rows.remove(row)
 
 	def download_all(self, media_type):
+		"""checks if the user has selected a download directory and then starts the download"""
 		if not hasattr(self, 'download_directory'):
 			self.progress_label.configure(text="Error: Select save location first!")
 			return
@@ -495,6 +530,7 @@ class App(CTk):
 		threading.Thread(target=self.process_downloads, args=(media_type,)).start()
 
 	def process_downloads(self, media_type):
+		"""goes through all the links you've added and downloads them either as mp3 or mp4"""
 		self.after(0, lambda: self.progress_label.configure(text="Initializing..."))
 		
 		if not os.path.isfile(self.ffmpeg_path):
@@ -615,6 +651,7 @@ class App(CTk):
 		self.after(0, self.clear_links)
 
 	def update_progress(self, data):
+		"""updates the progress bar for the user to see the progress of the downloads"""
 		if data['status'] == 'downloading':
 			progress = data.get('downloaded_bytes', 0) / data.get('total_bytes', 1)
 			self.progress_bar.set(progress)
@@ -636,10 +673,12 @@ class App(CTk):
 			self.after(2000, lambda: self.progress_bar.set(0))
 
 	def update_overall_progress(self, progress, current, total):
+		"""updates the user on the overall progress"""
 		self.progress_bar.set(progress)
 		self.progress_label.configure(text=f"Completed: {current}/{total}")
 
 	def clear_links(self):
+   	"""removes all the links from the link list when done downloading"""
 		for row in self.link_rows:
 			row.destroy()
 		self.links.clear()
