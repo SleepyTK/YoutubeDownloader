@@ -128,7 +128,7 @@ class App(CTk):
 	"""Main application window."""
 	def __init__(self):
 		super().__init__()
-		self.title("YouTube Downloader v1.0.0")
+		self.title("YouTube Downloader v1.0.1")
 		self.geometry("885x450")
 		self.resizable(0, 0)
 		self.attributes('-topmost', True)
