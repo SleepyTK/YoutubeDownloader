@@ -464,7 +464,7 @@ class App(CTk):
 		self.search_results_frame.update_idletasks()
 
 	def get_available_encoders(self, ffmpeg_path):
-   		"""checks what encoders are available and what gpu you have to return the available encoders"""
+			"""checks what encoders are available and what gpu you have to return the available encoders"""
 			encoders = ['libx264 (CPU)']
 			detected_gpu = detect_gpu(ffmpeg_path)
 			print(f"GPU Detected: {detected_gpu}")
@@ -678,7 +678,7 @@ class App(CTk):
 		self.progress_label.configure(text=f"Completed: {current}/{total}")
 
 	def clear_links(self):
-   	"""removes all the links from the link list when done downloading"""
+		"""removes all the links from the link list when done downloading"""
 		for row in self.link_rows:
 			row.destroy()
 		self.links.clear()
@@ -688,3 +688,4 @@ class App(CTk):
 if __name__ == "__main__":
 	app = App()
 	app.mainloop()
+		
