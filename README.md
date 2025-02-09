@@ -34,3 +34,11 @@ For issues, [open a GitHub ticket](https://github.com/SleepyTK/YoutubeDownloader
 ## Currently Working on
 - adding video thumbnail and length added to the video cards
 
+
+## If you want to run the python code instead of downloading the exe (python installation 3.10 or higher required)
+1. Clone the repository
+2. Download ffmpeg from [ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z) and move ffmpeg.exe & ffprobe.exe into the 'src/ffmpeg' folder
+3. make a virtual environment in the root folder by running this command in your root: "python -m venv venv"
+4. Start the virtual environment by running this command in your root: "venv/Scripts/Activate"
+5. install all the dependencies by running this command in your root: "pip install -r scr/requirements.txt"
+6. try running the program by running this command in your root: "python src/main.py"
