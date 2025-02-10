@@ -23,7 +23,13 @@ def detect_gpu(ffmpeg_path):
 	try:
 		result = subprocess.run(
 			[ffmpeg_path, '-hide_banner', '-encoders'],
-			capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW
+			capture_output=True,
+			text=True,
+			timeout=10,
+			check=True,
+			shell=False,
+			env={'PATH': os.environ['PATH']},
+			creationflags=subprocess.CREATE_NO_WINDOW
 		)
 		encoders = result.stdout.lower()
 
@@ -39,9 +45,9 @@ def detect_gpu(ffmpeg_path):
 
 		print("No GPU encoder found, defaulting to CPU")
 		return 'cpu'
-	except Exception as e:
-		print(f"GPU detection error: {str(e)}")
-		return 'cpu'
+	except subprocess.TimeoutExpired as e:
+			logging.critical("FFmpeg detection timed out")
+			raise
 
 def sanitize_filename(filename):
 	"""Sanitizes a filename by removing invalid characters and limiting length."""
@@ -272,7 +278,7 @@ class App(CTk):
 		)
 		self.resolution_menu.set("720p")
 		self.resolution_menu.place(x=438, y=380)
-  
+		
 		self.bitrate_menu = CTkOptionMenu(
 			master=self.main_frame,
 			values=["10Mpbs", "6Mbps", "5Mbps", "4Mbps", "3Mbps", "2Mbps"],
