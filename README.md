@@ -1,6 +1,6 @@
 # YouTube Downloader
 
-<img src="images/YoutubeDownloaderv1.0.2.png" width="885" alt="Youtube Downloader v1.0.2">
+<img src="images/YoutubeDownloaderv1.0.2.png" width="885" alt="Youtube Downloader v1.0.3">
 
 ## Features
 - Download videos/audio from YouTube
@@ -28,7 +28,7 @@ For issues, [open a GitHub ticket](https://github.com/SleepyTK/YoutubeDownloader
 - The EXE might get flagged by antivirus software (e.g., McAfee) due to the nature of video downloads. If this happens, you may need to adjust your antivirus settings temporarily while the program is being certified.
 
 ## Currently Working on
-- Adding video thumbnails and duration to video cards in the application interface
+- Adding video thumbnails and duration to video cards in the application interface on both the search frame and link frame
 
 ## Running the Python Code (Requires Python 3.10 or Higher)
 
