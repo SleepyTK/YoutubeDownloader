@@ -14,9 +14,12 @@ from pathlib import Path
 from customtkinter import (
 	set_default_color_theme, CTk, CTkFrame, CTkLabel, CTkButton,
 	CTkEntry, CTkScrollableFrame, CTkProgressBar, CTkOptionMenu,
-	CTkFont, CTkToplevel
+	CTkFont, CTkToplevel, CTkImage
 )
 from tkinter import filedialog, messagebox, StringVar
+from PIL import Image, ImageDraw  
+import io
+from concurrent.futures import ThreadPoolExecutor
 
 def detect_gpu(ffmpeg_path):
 	"""Detects the available GPU and returns its type."""
@@ -131,20 +134,26 @@ class UpdateHandler:
 
 
 class App(CTk):
+	THUMBNAIL_WIDTH = 128
+	THUMBNAIL_HEIGHT = 72
 	"""Main application window."""
 	def __init__(self):
-		super().__init__()
-		self.title("YouTube Downloader v1.0.2")
-		self.geometry("885x450")
+		super().__init__(fg_color='#040D12')
+		self.title("YouTube Downloader v1.0.3")
+		self.geometry("1015x450")
 		self.resizable(0, 0)
 		self.attributes('-topmost', True)
-		self.my_font = CTkFont(family="System", weight="bold")
+		self.my_font = CTkFont(family="Helvetica", weight="bold")
 		set_default_color_theme("green")
 		
 		self.search_queue = queue.Queue()
 		self.search_cache = {}
 		self.current_search_id = 0
 		self.last_search_time = 0
+  
+		self.thumbnail_cache = {}
+		self.thumbnail_executor = ThreadPoolExecutor(max_workers=4)
+		self.placeholder_image = self._create_placeholder_image()
 			
 		try:
 			base_path = Path(sys._MEIPASS)
@@ -173,16 +182,19 @@ class App(CTk):
 			))
 			return
 
-		self.main_frame = CTkFrame(master=self, corner_radius=6)
+		self.main_frame = CTkFrame(master=self, corner_radius=6, fg_color='#040D12')
 		self.main_frame.pack(pady=10, padx=10, expand=True, fill="both")
 
 		self.link_entry = CTkEntry(
 			master=self.main_frame,
 			height=30,
 			width=275,
-			corner_radius=0,
+			corner_radius=5,
 			font=self.my_font,
-			placeholder_text="Enter YouTube URL here..."
+			placeholder_text="Enter YouTube URL here...",
+			fg_color='#183D3D',
+			text_color='#93B1A6',
+			placeholder_text_color='#93B1A6'
 		)
 		self.link_entry.place(x=10, y=10)
 
@@ -193,7 +205,9 @@ class App(CTk):
 			corner_radius=0,
 			text="ADD LINK",
 			command=self.add_link,
-			font=self.my_font
+			font=self.my_font,
+			fg_color='#183D3D',
+			text_color='#93B1A6',
 		)
 		self.add_button.place(x=10, y=50)
 
@@ -203,7 +217,8 @@ class App(CTk):
 			width=275,
 			text="No directory selected",
 			wraplength=275,
-			font=self.my_font
+			font=self.my_font,
+			text_color='#93B1A6',
 		)
 		self.directory_label.place(x=10, y=90)
 
@@ -214,17 +229,22 @@ class App(CTk):
 			corner_radius=0,
 			text="CHOOSE SAVE LOCATION",
 			command=self.select_directory,
-			font=self.my_font
+			font=self.my_font,
+			fg_color='#183D3D',
+			text_color='#93B1A6',
 		)
 		self.dir_button.place(x=10, y=340)
 
 		self.search_entry = CTkEntry(
 			master=self.main_frame,
 			height=30,
-			width=275,
+			width=self.THUMBNAIL_WIDTH+ 277,
 			corner_radius=0,
 			font=self.my_font,
-			placeholder_text="Search YouTube Videos..."
+			placeholder_text="Search YouTube Videos...",
+			fg_color='#183D3D',
+			text_color='#93B1A6',
+			placeholder_text_color='#93B1A6'
 		)
 		self.search_entry.place(x=580, y=340)
 		self.search_entry.bind("<Return>", lambda event: self.perform_search())
@@ -233,18 +253,24 @@ class App(CTk):
 			master=self.main_frame,
 			values=self.get_available_encoders(self.ffmpeg_path),
 			height=30,
-			width=275,
+			width=self.THUMBNAIL_WIDTH+ 277,
 			corner_radius=0,
 			font=self.my_font,
-			dropdown_font=self.my_font
+			dropdown_font=self.my_font,
+			fg_color='#183D3D',
+			dropdown_fg_color='#183D3D',
+			button_color='#183D3D',
+			text_color='#93B1A6',
+			dropdown_text_color='#93B1A6',
 		)
 		self.encoder_menu.place(x=580, y=380)
 
 		self.search_results_frame = CTkScrollableFrame(
 			master=self.main_frame,
-			width=260,
+			width=self.THUMBNAIL_WIDTH + 260,
 			height=320,
-			corner_radius=0
+			corner_radius=0,
+   		fg_color='#183D3D'
 		)
 		self.search_results_frame.place(x=580, y=10)
 
@@ -252,7 +278,8 @@ class App(CTk):
 			master=self.main_frame,
 			width=260,
 			height=320,
-			corner_radius=0
+			corner_radius=0,
+			fg_color='#183D3D'
 		)
 		self.scrollable_frame.place(x=295, y=10)
 
@@ -263,7 +290,9 @@ class App(CTk):
 			corner_radius=0,
 			text="DOWNLOAD AUDIO",
 			command=lambda: self.download_all("audio"),
-			font=self.my_font
+			font=self.my_font,
+			fg_color='#183D3D',
+			text_color='#93B1A6',
 		)
 		self.audio_button.place(x=295, y=340)
 
@@ -274,7 +303,12 @@ class App(CTk):
 			width=135,
 			corner_radius=0,
 			font=self.my_font,
-			dropdown_font=self.my_font
+			dropdown_font=self.my_font,
+			fg_color='#183D3D',
+			dropdown_fg_color='#183D3D',
+			button_color='#183D3D',
+			text_color='#93B1A6',
+			dropdown_text_color='#93B1A6',
 		)
 		self.resolution_menu.set("720p")
 		self.resolution_menu.place(x=438, y=380)
@@ -286,7 +320,12 @@ class App(CTk):
 			width=135,
 			corner_radius=0,
 			font=self.my_font,
-			dropdown_font=self.my_font
+			dropdown_font=self.my_font,
+			fg_color='#183D3D',
+			dropdown_fg_color='#183D3D',
+			button_color='#183D3D',
+			text_color='#93B1A6',
+			dropdown_text_color='#93B1A6',
 		)
 		self.bitrate_menu.set("5Mbps")
 		self.bitrate_menu.place(x=295, y=380)
@@ -298,7 +337,9 @@ class App(CTk):
 			corner_radius=0,
 			text="DOWNLOAD VIDEO",
 			command=lambda: self.download_all("video"),
-			font=self.my_font
+			font=self.my_font,
+			fg_color='#183D3D',
+			text_color='#93B1A6',
 		)
 		self.video_button.place(x=437, y=340)
 
@@ -307,7 +348,8 @@ class App(CTk):
 			orientation="horizontal",
 			width=275,
 			height=30,
-			corner_radius=0
+			corner_radius=0,
+			fg_color='#183D3D',
 		)
 		self.progress_bar.set(0)
 		self.progress_bar.place(x=10, y=380)
@@ -317,7 +359,8 @@ class App(CTk):
 			text="Ready",
 			height=15,
 			font=CTkFont(size=10),
-			fg_color="transparent"
+			fg_color="transparent",
+			text_color='#93B1A6',
 		)
 		self.progress_label.place(x=10, y=410)
 
@@ -439,46 +482,115 @@ class App(CTk):
 				pass
 
 	def _update_ui(self, search_results):
-		"""updates the ui with the search results it got from process search results"""
-		self._clear_search_results()
-		
-		if not search_results or not search_results.get('entries'):
-				CTkLabel(
-						self.search_results_frame,
-						text="No results found.",
-						font=self.my_font
-				).pack(pady=10)
-				return
+			self._clear_search_results()
+			
+			if not search_results or not search_results.get('entries'):
+					CTkLabel(self.search_results_frame, text="No results found.", font=self.my_font).pack(pady=10)
+					return
 
-		container = CTkFrame(self.search_results_frame)
-		container.pack(fill="both", expand=True)
-		
-		for video in search_results.get("entries", []):
-				if not video:
-						continue
-						
-				result_frame = CTkFrame(container, corner_radius=0)
-				result_frame.pack(fill="x", padx=5, pady=2, anchor="nw")
+			for video in search_results.get("entries", []):
+					if not video:
+							continue
+							
+					result_frame = CTkFrame(self.search_results_frame, height=self.THUMBNAIL_HEIGHT, fg_color="#040D12")
+					result_frame.pack(fill="x", padx=5, pady=3)
 
-				title_var = StringVar(value=video.get('title', 'Untitled'))
-				
-				CTkLabel(
-						result_frame,
-						textvariable=title_var,
-						font=self.my_font,
-						wraplength=150
-				).pack(side="left", padx=5, pady=5)
+					# Thumbnail label
+					thumbnail_label = CTkLabel(
+							result_frame, 
+							image=self.placeholder_image,
+							text="",
+							width=self.THUMBNAIL_WIDTH,
+							height=self.THUMBNAIL_HEIGHT,
+					)
+					thumbnail_label.pack(side="left", padx=5, pady=5)
 
-				CTkButton(
-						result_frame,
-						text="ADD",
-						width=60,
-						corner_radius=0,
-						font=self.my_font,
-						command=lambda url=video.get('url'): self.add_link(url)
-				).pack(side="right", padx=5, pady=5)
+					# Text content frame
+					content_frame = CTkFrame(result_frame, fg_color="transparent")
+					content_frame.pack(side="left", fill="both", expand=True, padx=3)
 
-		self.search_results_frame.update_idletasks()
+					# Use grid layout for title and button
+					content_frame.grid_columnconfigure(0, weight=1)
+					
+					# Title
+					title_var = StringVar(value=video.get('title', 'Untitled'))
+					title_label = CTkLabel(
+							content_frame,
+							textvariable=title_var,
+							font=self.my_font,
+							text_color= '#93B1A6',
+							wraplength=160,
+							width= 175,
+							justify='left',
+							anchor="w"
+					)
+					title_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
+					# Add button
+					CTkButton(
+							content_frame,
+							text="ADD",
+							width=60,
+							corner_radius=5,
+							font=self.my_font,
+							text_color='#93B1A6',
+							fg_color='#183D3D',
+							command=lambda url=video.get('url'): self.add_link(url)
+					).grid(row=0, column=1, padx=5, sticky="e")
+
+					# Start thumbnail download
+					video_id = video.get('id')
+					if video_id:
+							self._load_thumbnail(video_id, thumbnail_label)
+  
+	def _create_placeholder_image(self):
+		img = Image.new('RGB', (self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT), (40, 40, 40))
+		return CTkImage(light_image=img, dark_image=img, size=(self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT))
+
+	def _load_thumbnail(self, video_id, label):
+			if video_id in self.thumbnail_cache:
+					self._update_thumbnail(label, self.thumbnail_cache[video_id])
+					return
+
+			self.thumbnail_executor.submit(
+					self._download_thumbnail,
+					video_id,
+					label
+			)
+
+	def _download_thumbnail(self, video_id, label):
+			try:
+					url = f"https://img.youtube.com/vi/{video_id}/mqdefault.jpg"
+					response = requests.get(url, timeout=5)
+					if response.status_code == 200:
+							# Create rounded mask
+							mask = Image.new("L", (self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT), 0)
+							draw = ImageDraw.Draw(mask)
+							draw.rounded_rectangle(
+									(0, 0, self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT),
+									radius=10,
+									fill=255
+							)
+
+							# Process image
+							image = Image.open(io.BytesIO(response.content))
+							image = image.resize((self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT), Image.LANCZOS)
+							
+							# Apply rounded corners
+							image.putalpha(mask)
+							
+							ctk_image = CTkImage(
+									light_image=image,
+									dark_image=image,
+									size=(self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT)
+							)
+							self.thumbnail_cache[video_id] = ctk_image
+							self._update_thumbnail(label, ctk_image)
+			except Exception as e:
+					print(f"Thumbnail download failed: {e}")
+
+	def _update_thumbnail(self, label, image):
+			self.after(0, lambda: label.configure(image=image))
 
 	def get_available_encoders(self, ffmpeg_path):
 			"""checks what encoders are available and what gpu you have to return the available encoders"""
@@ -517,14 +629,16 @@ class App(CTk):
 		link = url or self.link_entry.get()
 		if link:
 			self.links.append(link)
-			link_row = CTkFrame(master=self.scrollable_frame, corner_radius=0)
+			link_row = CTkFrame(master=self.scrollable_frame, corner_radius=10, fg_color='#040D12')
 			link_row.pack(fill="x", padx=5, pady=2)
-			CTkLabel(link_row, text=link, font=self.my_font, wraplength=150).pack(side="left", padx=5, pady=5)
+			CTkLabel(link_row, text=link, font=self.my_font, wraplength=150, text_color='#93B1A6').pack(side="left", padx=5, pady=5)
 			CTkButton(
 				link_row,
 				text="REMOVE",
-				corner_radius=0,
+				corner_radius=5,
 				font=self.my_font,
+				fg_color='#183D3D',
+				text_color= '#93B1A6',
 				command=lambda: self.remove_link(link, link_row)
 			).pack(side="right", padx=5, pady=5)
 			self.link_rows.append(link_row)
