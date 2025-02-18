@@ -4,8 +4,6 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
 ![FFmpeg Required](https://img.shields.io/badge/FFmpeg-Required-orange.svg)
 
-**A production-grade YouTube downloader blending intuitive design with robust technical implementation**
-
 <img src="images/YoutubeDownloaderv1.0.3.png" width="885" alt="Youtube Downloader Interface Preview">
 
 ## Project Overview
