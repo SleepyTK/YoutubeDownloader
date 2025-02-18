@@ -78,16 +78,13 @@ A dual-purpose application that:
   - Hardware-accelerated video encoding
   - Auto-update system
   - Production-ready packaging
-- **For Recruiters**: Showcases skills in:
   - GUI development (CustomTkinter)
-  - Concurrent programming
-  - CI/CD pipeline implementation
 
 ### Key Features
 | User Experience | Technical Merit |
 |-----------------|-----------------|
 | 🔍 In-app YouTube search | ⚡ GPU-accelerated encoding (NVENC/AMF/QSV) |
-| 🎨 Dark mode UI with thumbnails | 🧵 ThreadPoolExecutor for background tasks |
+| 🎨 Dark Themed UI | 🧵 ThreadPoolExecutor for background tasks |
 | 📥 Batch download queue | 🔄 GitHub API integration for auto-updates |
 | 🛠️ One-click EXE installer | 🔒 Sanitized filename handling |
 
@@ -104,12 +101,6 @@ A dual-purpose application that:
 - Image processing (`PIL`)
 - Cross-thread communication (`queue`)
 
-### Target Audience
-| User Type | Value Received |
-|-----------|----------------|
-| Casual Users | Simple content downloading |
-| Developers | Reference implementation of:<br>- Hardware acceleration<br>- Auto-updating apps<br>- Production packaging |
-| Recruiters | Evidence of:<br>- Full project lifecycle management<br>- Technical decision making<br>- Production debugging skills |
 ## Table of Contents
 - 🚀 [Features](#-features)
 - 📥 [Installation](#-installation)
@@ -140,35 +131,43 @@ A dual-purpose application that:
 ## 📥 Installation
 
 ### For End Users
-1. Download latest `YouTube_Downloader.exe` from [Releases](https://github.com/SleepyTK/YoutubeDownloader/releases)
-2. Double-click to run (no admin rights needed)
+🚀 **Quick Start**  
+1. Download the latest `YouTube_Downloader.exe` from our [Releases page](https://github.com/SleepyTK/YoutubeDownloader/releases)
+2. Double-click the executable to launch  
+   *No additional dependencies required*
+
+> **Note**: Windows may show a security warning - this is normal for unsigned executables. Click "More info" then "Run anyway".
+
+---
 
 ### For Developers
+**System Requirements**  
+- Python 3.10+ (64-bit)
+- Windows 10/11 (Linux support planned)
+
+**Setup Process**:
+
 ```bash
 # 1. Clone repository
 git clone https://github.com/SleepyTK/YoutubeDownloader.git
 cd YoutubeDownloader
 
-# 2. Set up Python environment
-python -m venv venv  # Create virtual environment
-
-# Activate environment
-venv\Scripts\activate
+# 2. Create and activate virtual environment
+python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # macOS/Linux
 
 # 3. Install Python dependencies
 pip install -r requirements.txt
 
-# If pip install fails:
-python -m pip install --upgrade pip
-pip install -r requirements.txt --force-reinstall
+# 4. Configure FFmpeg
+# Download from: https://www.gyan.dev/ffmpeg/builds/
+# Place these files in project:
+#   - src/ffmpeg/ffmpeg.exe
+#   - src/ffmpeg/ffprobe.exe
 
-# 4. Set up FFmpeg
-# Download ffmpeg.exe and ffprobe.exe from:
-# https://www.gyan.dev/ffmpeg/builds/
-# Place both files in: src/ffmpeg/
-
-# 5. Verify setup
-python src/main.py  # Should launch the application
+# 5. Verify installation
+python src/main.py
 ```
 
 ## 🗺️ Roadmap
