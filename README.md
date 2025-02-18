@@ -102,7 +102,6 @@ A dual-purpose application that:
 - Cross-thread communication (`queue`)
 
 ## Table of Contents
-- 🚀 [Features](#-features)
 - 📥 [Installation](#-installation)
 - [Usage Guide](#-usage-guide)
 - [Technical Deep Dive](#-technical-deep-dive)
@@ -112,27 +111,11 @@ A dual-purpose application that:
 
 ---
 
-## 🚀 Features
-
-### User-Facing
-🔍 **Smart Search** - Find videos directly in-app  
-🔄 **Auto-Update** - Get latest features automatically  
-🎨 **Modern GUI** - Dark theme with thumbnail previews  
-📥 **Batch Downloads** - Queue multiple videos at once
-
-### Technical Highlights
-⚡ **Hardware Acceleration** - NVIDIA/AMD/Intel GPU support  
-🧵 **Multi-Threading** - Background processing for smooth UI  
-🔒 **Safe Filenames** - Automatic path sanitization  
-📦 **EXE Packaging** - Single-file distribution
-
----
-
 ## 📥 Installation
 
 ### For End Users
 🚀 **Quick Start**  
-1. Download the latest `YouTube_Downloader.exe` from our [Releases page](https://github.com/SleepyTK/YoutubeDownloader/releases)
+1. Download the latest `YouTube_Downloader.exe` from my [Releases page](https://github.com/SleepyTK/YoutubeDownloader/releases)
 2. Double-click the executable to launch  
    *No additional dependencies required*
 
@@ -155,7 +138,7 @@ cd YoutubeDownloader
 # 2. Create and activate virtual environment
 python -m venv venv
 venv\Scripts\activate  # Windows
-# source venv/bin/activate  # macOS/Linux
+# source venv/bin/activate  # macOS/Linux (when support is available)
 
 # 3. Install Python dependencies
 pip install -r requirements.txt
