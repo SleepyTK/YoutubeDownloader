@@ -40,8 +40,8 @@ A dual-purpose application that:
 
 ## Table of Contents
 - 📥 [Installation](#-installation)
-- [Usage Guide](#-usage-guide)
-- [Technical Deep Dive](#-technical-deep-dive)
+- 🖥️ [Usage Guide](#-usage-guide)
+- [Technical Details](#-technical-details)
 - [Development Setup](#-development-setup)
 - 🗺️ [Roadmap](#-roadmap)
 - [License](#-license)
@@ -177,3 +177,17 @@ This software bundles FFmpeg binaries licensed under [LGPL v2.1](src/ffmpeg/LICE
 
 ## Support
 For issues, [open a GitHub ticket](https://github.com/SleepyTK/YoutubeDownloader/issues).
+
+## 🧠 Technical Deep Dive
+
+### Core Architecture
+```mermaid
+graph TD
+    A[GUI Layer] --> B[Business Logic]
+    B --> C[YouTubeDL Interface]
+    B --> D[FFmpeg Processor]
+    B --> E[Update Handler]
+    C --> F[Video Metadata]
+    D --> G[Hardware Encoding]
+    E --> H[GitHub API]
+```
