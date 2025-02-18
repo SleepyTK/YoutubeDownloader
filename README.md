@@ -170,13 +170,13 @@ python src/main.py
      3. Click "ADD" on desired results  
 
 3. **Configure Settings**  
-   <img src="settings_dropdowns.png" width="300" alt="Configuration options">  
+   <img src="images/settings_dropdowns.png" width="400" alt="Configuration options">  
    - **Resolution**: Dropdown (1080p, 720p, 480p, 360p)  
    - **Bitrate**: Dropdown (10Mbps to 2Mbps)  
    - **Encoder**: Auto-populated based on detected GPU  
 
 4. **Start Download**  
-   <img src="images/download_buttons.png" width="150" alt="Download buttons">  
+   <img src="images/download_buttons.png" width="400" alt="Download buttons">  
    - **Video**: Click "DOWNLOAD VIDEO" for MP4  
    - **Audio**: Click "DOWNLOAD AUDIO" for MP3  
 
