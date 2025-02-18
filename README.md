@@ -41,8 +41,7 @@ A dual-purpose application that:
 ## Table of Contents
 - 📥 [Installation](#-installation)
 - 🖥️ [Usage Guide](#-usage-guide)
-- [Technical Details](#-technical-details)
-- [Development Setup](#-development-setup)
+- 🧠 [Technical Deep Dive](#-technical-deep-dive)
 - 🗺️ [Roadmap](#-roadmap)
 - [License](#-license)
 
@@ -170,14 +169,6 @@ self.encoder_menu = CTkOptionMenu(
 - music player
 - improved UI
 
-## License
-This software bundles FFmpeg binaries licensed under [LGPL v2.1](src/ffmpeg/LICENSE.txt).
-
-
-
-## Support
-For issues, [open a GitHub ticket](https://github.com/SleepyTK/YoutubeDownloader/issues).
-
 ## 🧠 Technical Deep Dive
 
 ### Core Architecture
@@ -275,3 +266,9 @@ ydl_opts = {
     ]
 }
 ```
+
+## License
+This software bundles FFmpeg binaries licensed under [LGPL v2.1](src/ffmpeg/LICENSE.txt).
+
+## Support
+For issues, [open a GitHub ticket](https://github.com/SleepyTK/YoutubeDownloader/issues).
