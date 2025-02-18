@@ -157,8 +157,8 @@ python src/main.py
 ## 🖥️ Usage Guide
 
 ### Basic Workflow
-1. **Select Save Location**   
-   - Click "CHOOSE SAVE LOCATION" - <img src="images/select_dir_button.png" width="200" alt="Directory selection button" style="display:flex; align-items:center;">
+1. **Select Save Location**  
+   - Click <img src="images/select_dir_button.png" width="200" alt="Directory selection button">
    - Select folder in dialog  
    - Confirmation appears in left panel
 
