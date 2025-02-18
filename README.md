@@ -230,6 +230,7 @@ def detect_gpu(ffmpeg_path):
 ### Encoder Matrix:
 
 | GPU Type | Video Encoder | Code Reference |
+| -------- | ------------- | -------------- |
 | NVIDIA | h264_nvenc | encoder_args['h264_nvenc'] |
 | AMD | h264_amf | encoder_args['h264_amf'] |
 | Intel | h264_qsv | encoder_args['h264_qsv'] |
