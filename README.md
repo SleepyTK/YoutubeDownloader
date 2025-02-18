@@ -191,3 +191,46 @@ graph TD
     D --> G[Hardware Encoding]
     E --> H[GitHub API]
 ```
+
+## Hardware Acceleration
+
+### GPU Detection:
+```python
+def detect_gpu(ffmpeg_path):
+	try:
+		result = subprocess.run(
+			[ffmpeg_path, '-hide_banner', '-encoders'],
+			capture_output=True,
+			text=True,
+			timeout=10,
+			check=True,
+			shell=False,
+			env={'PATH': os.environ['PATH']},
+			creationflags=subprocess.CREATE_NO_WINDOW
+		)
+		encoders = result.stdout.lower()
+
+		if 'amf' in encoders or 'h264_amf' in encoders or 'hevc_amf' in encoders:
+			print("Detected GPU: AMD")
+			return 'amd'
+		if 'nvenc' in encoders or 'cuda' in encoders:
+			print("Detected GPU: NVIDIA")
+			return 'nvidia'
+		if 'qsv' in encoders or 'h264_qsv' in encoders or 'hevc_qsv' in encoders:
+			print("Detected GPU: Intel")
+			return 'intel'
+
+		print("No GPU encoder found, defaulting to CPU")
+		return 'cpu'
+	except subprocess.TimeoutExpired as e:
+			logging.critical("FFmpeg detection timed out")
+			raise
+```
+
+### Encoder Matrix:
+
+| GPU Type | Video Encoder | Code Reference |
+| NVIDIA | h264_nvenc | encoder_args['h264_nvenc'] |
+| AMD | h264_amf | encoder_args['h264_amf'] |
+| Intel | h264_qsv | encoder_args['h264_qsv'] |
+| CPU | libx264 | Default configuration |
