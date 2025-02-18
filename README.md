@@ -192,7 +192,7 @@ graph TD
     E --> H[GitHub API]
 ```
 
-## Hardware Acceleration
+1. ## Hardware Acceleration
 
 ### GPU Detection:
 ```python
@@ -235,3 +235,43 @@ def detect_gpu(ffmpeg_path):
 | AMD | h264_amf | encoder_args['h264_amf'] |
 | Intel | h264_qsv | encoder_args['h264_qsv'] |
 | CPU | libx264 | Default configuration |
+
+2. ## Update System
+
+### Version Check:
+```python
+current_v = version.parse(self.current_version)
+latest_v = version.parse(release['tag_name'].lstrip('v'))
+return latest_v > current_v
+```
+
+### Update Script:
+```bat
+@echo off
+timeout /t 1 /nobreak >nul
+del /F /Q "%OLD_EXE%"
+move /Y "%TEMP%\update_temp.exe" "%NEW_EXE%"
+start "" "%NEW_EXE%"
+del %0
+```
+
+3. ## Threading Model
+
+| Component | Concurrency Type | Implementation |
+| -------- | ------------- | -------------- |
+| Search | threading.Thread | _async_search() |
+| Thumbnails | ThreadPoolExecutor | max_workers=4 |
+| Downloads | Main Thread | process_downloads() |
+
+4. ## Video Processing
+```
+ydl_opts = {
+    'format': 'bestvideo[height<=720][vcodec!^=av01]+bestaudio/best',
+    'postprocessor_args': [
+        '-c:v', encoder, 
+        '-b:v', bitrate,
+        '-c:a', 'aac',
+        '-b:a', '192k'
+    ]
+}
+```
