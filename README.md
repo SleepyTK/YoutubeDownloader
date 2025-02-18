@@ -153,6 +153,50 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
+
+## 🖥️ Usage Guide
+
+### Basic Workflow
+1. **Select Save Location**  
+   <img src="images/select_dir_button.png" width="200" alt="Directory selection button">  
+   - Click "CHOOSE SAVE LOCATION"  
+   - Select folder in dialog  
+   - Confirmation appears in left panel
+
+2. **Add Content**  
+   <img src="images/add_link_ui.png" width="400" alt="URL input section">  
+   - **Method 1**: Paste URL in input field → Click "ADD LINK" or press Enter  
+   - **Method 2**: Use built-in search:  
+     1. Type query in right-side search bar  
+     2. Press Enter  
+     3. Click "ADD" on desired results  
+
+3. **Configure Settings**  
+   <img src="settings_dropdowns.png" width="300" alt="Configuration options">  
+   - **Resolution**: Dropdown (1080p, 720p, 480p, 360p)  
+   - **Bitrate**: Dropdown (10Mbps to 2Mbps)  
+   - **Encoder**: Auto-populated based on detected GPU  
+
+4. **Start Download**  
+   <img src="images/download_buttons.png" width="150" alt="Download buttons">  
+   - **Video**: Click "DOWNLOAD VIDEO" for MP4  
+   - **Audio**: Click "DOWNLOAD AUDIO" for MP3  
+
+### Interface Breakdown
+| UI Element | Purpose | Code Reference |
+|------------|---------|----------------|
+| <img src="images/progress_bar.png" width="200"> | Shows current file progress | `CTkProgressBar` |
+| <img src="images/search_results.png" width="300"> | Displays YouTube search results with thumbnails | `CTkScrollableFrame` |
+| <img src="images/queue_panel.png" width="200"> | Lists queued URLs with remove buttons | `CTkScrollableFrame` |
+
+### Settings Explained
+**Resolution Options**  
+```python
+# From __init__():
+self.resolution_menu = CTkOptionMenu(
+    values=["1080p", "720p", "480p", "360p"]
+)
+
 ## 🗺️ Roadmap
 
 - Playlist support
