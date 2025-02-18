@@ -57,3 +57,66 @@ If you'd like to run the Python version of the application instead of downloadin
 6. **Run the Program**  
     Finally, run the program using:
     `python src/main.py`
+
+
+# YouTube Downloader 🎥
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
+![FFmpeg Required](https://img.shields.io/badge/FFmpeg-Required-orange.svg)
+
+A modern YouTube downloader combining user-friendly design with technical sophistication.
+
+**For Users**: Simple GUI for downloading videos/audio  
+**For Developers**: Clean architecture with GPU acceleration  
+**For Recruiters**: Production-grade code with CI/CD
+
+## Table of Contents
+- [Features](#-features)
+- [Installation](#-installation)
+- [Usage Guide](#-usage-guide)
+- [Technical Deep Dive](#-technical-deep-dive)
+- [Development Setup](#-development-setup)
+- [Roadmap](#-roadmap)
+- [License](#-license)
+
+---
+
+## 🚀 Features
+
+### User-Facing
+🔍 **Smart Search** - Find videos directly in-app  
+🔄 **Auto-Update** - Get latest features automatically  
+🎨 **Modern GUI** - Dark theme with thumbnail previews  
+📥 **Batch Downloads** - Queue multiple videos at once
+
+### Technical Highlights
+⚡ **Hardware Acceleration** - NVIDIA/AMD/Intel GPU support  
+🧵 **Multi-Threading** - Background processing for smooth UI  
+🔒 **Safe Filenames** - Automatic path sanitization  
+📦 **EXE Packaging** - Single-file distribution
+
+---
+
+## 📥 Installation
+
+### For End Users
+1. Download latest `YouTube_Downloader.exe` from [Releases](https://github.com/SleepyTK/YoutubeDownloader/releases)
+2. Double-click to run (no admin rights needed)
+
+### For Developers
+```bash
+# 1. Clone repository
+git clone https://github.com/SleepyTK/YoutubeDownloader.git
+cd YoutubeDownloader
+
+# 2. Install Python 3.10+
+# Download from https://python.org
+
+# 3. Set up FFmpeg (Windows)
+mkdir src\ffmpeg
+curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z -o ffmpeg.7z
+7z x ffmpeg.7z -osrc\ffmpeg
+
+# 4. Install dependencies
+pip install -r requirements.txt

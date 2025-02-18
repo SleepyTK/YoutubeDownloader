@@ -495,7 +495,6 @@ class App(CTk):
 					result_frame = CTkFrame(self.search_results_frame, height=self.THUMBNAIL_HEIGHT, fg_color="#040D12")
 					result_frame.pack(fill="x", padx=5, pady=3)
 
-					# Thumbnail label
 					thumbnail_label = CTkLabel(
 							result_frame, 
 							image=self.placeholder_image,
@@ -505,14 +504,11 @@ class App(CTk):
 					)
 					thumbnail_label.pack(side="left", padx=5, pady=5)
 
-					# Text content frame
 					content_frame = CTkFrame(result_frame, fg_color="transparent")
 					content_frame.pack(side="left", fill="both", expand=True, padx=3)
 
-					# Use grid layout for title and button
 					content_frame.grid_columnconfigure(0, weight=1)
-					
-					# Title
+
 					title_var = StringVar(value=video.get('title', 'Untitled'))
 					title_label = CTkLabel(
 							content_frame,
@@ -526,7 +522,6 @@ class App(CTk):
 					)
 					title_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
-					# Add button
 					CTkButton(
 							content_frame,
 							text="ADD",
@@ -538,7 +533,6 @@ class App(CTk):
 							command=lambda url=video.get('url'): self.add_link(url)
 					).grid(row=0, column=1, padx=5, sticky="e")
 
-					# Start thumbnail download
 					video_id = video.get('id')
 					if video_id:
 							self._load_thumbnail(video_id, thumbnail_label)
@@ -559,35 +553,32 @@ class App(CTk):
 			)
 
 	def _download_thumbnail(self, video_id, label):
-			try:
-					url = f"https://img.youtube.com/vi/{video_id}/mqdefault.jpg"
-					response = requests.get(url, timeout=5)
-					if response.status_code == 200:
-							# Create rounded mask
-							mask = Image.new("L", (self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT), 0)
-							draw = ImageDraw.Draw(mask)
-							draw.rounded_rectangle(
-									(0, 0, self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT),
-									radius=10,
-									fill=255
-							)
+		try:
+			url = f"https://img.youtube.com/vi/{video_id}/mqdefault.jpg"
+			response = requests.get(url, timeout=5)
+			if response.status_code == 200:
+				mask = Image.new("L", (self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT), 0)
+				draw = ImageDraw.Draw(mask)
+				draw.rounded_rectangle(
+					(0, 0, self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT),
+					radius=10,
+					fill=255
+				)
 
-							# Process image
-							image = Image.open(io.BytesIO(response.content))
-							image = image.resize((self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT), Image.LANCZOS)
-							
-							# Apply rounded corners
-							image.putalpha(mask)
-							
-							ctk_image = CTkImage(
-									light_image=image,
-									dark_image=image,
-									size=(self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT)
-							)
-							self.thumbnail_cache[video_id] = ctk_image
-							self._update_thumbnail(label, ctk_image)
-			except Exception as e:
-					print(f"Thumbnail download failed: {e}")
+				image = Image.open(io.BytesIO(response.content))
+				image = image.resize((self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT), Image.LANCZOS)
+
+				image.putalpha(mask)
+				
+				ctk_image = CTkImage(
+					light_image=image,
+					dark_image=image,
+					size=(self.THUMBNAIL_WIDTH, self.THUMBNAIL_HEIGHT)
+				)
+				self.thumbnail_cache[video_id] = ctk_image
+				self._update_thumbnail(label, ctk_image)
+		except Exception as e:
+				print(f"Thumbnail download failed: {e}")
 
 	def _update_thumbnail(self, label, image):
 			self.after(0, lambda: label.configure(image=image))
@@ -600,7 +591,7 @@ class App(CTk):
 
 			try:
 				result = subprocess.run([ffmpeg_path, '-hide_banner', '-encoders'], 
-																capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+							capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
 				encoder_output = result.stdout.lower()
 		
 				print(f"Available Encoders from FFmpeg:\n{encoder_output}")
