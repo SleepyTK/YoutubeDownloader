@@ -132,6 +132,36 @@ self.resolution_menu = CTkOptionMenu(
     values=["1080p", "720p", "480p", "360p"]
 )
 ```
+- Affects video height (e.g., 720p = 1280x720 pixels)
+
+**Bitrate Options** 
+```python
+# From __init__():
+self.bitrate_menu = CTkOptionMenu(
+    values=["10Mpbs", "6Mbps", "5Mbps", "4Mbps", "3Mbps", "2Mbps"]
+)
+```
+- Higher values = better quality but larger files
+- Applies only to video downloads
+
+**Encoder Options** 
+```python
+# From __init__():
+self.encoder_menu = CTkOptionMenu(
+			values=self.get_available_encoders(self.ffmpeg_path)
+)
+```
+- will process videos faster when a gpu encoder is selected
+- gets available gpu encoders based on what u have in your pc
+- Applies only to video downloads
+
+### Troubleshooting
+
+| Issue                          | Solution                                      | Code Reference                     |
+|--------------------------------|-----------------------------------------------|------------------------------------|
+| **"FFmpeg verification failed"** | 1. Reinstall `ffmpeg.exe` and `ffprobe.exe`<br>2. Place in `src/ffmpeg/` directory | `self.ffmpeg_path` check in `__init__` |
+| **"Select save location first!"** | Click "CHOOSE SAVE LOCATION" button before starting download | `hasattr(self, 'download_directory')` check |
+| **"Invalid URL"**              | Ensure URL starts with `http://` or `https://` | `link.startswith(('http://', 'https://'))` validation |
 
 ## 🗺️ Roadmap
 
