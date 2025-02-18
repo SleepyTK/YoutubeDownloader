@@ -158,7 +158,7 @@ python src/main.py
 
 ### Basic Workflow
 1. **Select Save Location**  
-   <img src="images/select_dir_button.png" width="200" alt="Directory selection button">  
+   - <img src="images/select_dir_button.png" width="200" alt="Directory selection button">  
    - Click "CHOOSE SAVE LOCATION"  
    - Select folder in dialog  
    - Confirmation appears in left panel
