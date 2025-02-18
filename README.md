@@ -163,7 +163,7 @@ python src/main.py
    - Confirmation appears in left panel
 
 2. **Add Content**  
-   <img src="images/add_link_ui.png" width="400" alt="URL input section">  
+   <img src="images/add_link_button.png" width="200" alt="URL input section">  
    - **Method 1**: Paste URL in input field → Click "ADD LINK" or press Enter  
    - **Method 2**: Use built-in search:  
      1. Type query in right-side search bar  
