@@ -162,9 +162,8 @@ python src/main.py
    - Select folder in dialog  
    - Confirmation appears in left panel
 
-2. **Add Content**  
-   <img src="images/add_link_button.png" width="200" alt="URL input section">  
-   - **Method 1**: Paste URL in input field → Click "ADD LINK" or press Enter  
+2. **Add Content**    
+   - **Method 1**: Paste URL in input field → Click <img src="images/add_link_button.png" width="200" alt="URL input section"> or press Enter  
    - **Method 2**: Use built-in search:  
      1. Type query in right-side search bar  
      2. Press Enter  
