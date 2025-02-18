@@ -63,13 +63,11 @@ If you'd like to run the Python version of the application instead of downloadin
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
-![FFmpeg Required](https://img.shields.io/badge/FFmpeg-Required-orange.svg)
+[![FFmpeg Required](https://img.shields.io/badge/FFmpeg-Required-orange.svg)]
 
 A modern YouTube downloader combining user-friendly design with technical sophistication.
 
-**For Users**: Simple GUI for downloading videos/audio  
-**For Developers**: Clean architecture with GPU acceleration  
-**For Recruiters**: Production-grade code with CI/CD
+<img src="images/YoutubeDownloaderv1.0.3.png" width="885" alt="Youtube Downloader v1.0.3">
 
 ## Table of Contents
 - [Features](#-features)
@@ -110,13 +108,33 @@ A modern YouTube downloader combining user-friendly design with technical sophis
 git clone https://github.com/SleepyTK/YoutubeDownloader.git
 cd YoutubeDownloader
 
-# 2. Install Python 3.10+
-# Download from https://python.org
+# 2. Set up Python environment
+python -m venv venv  # Create virtual environment
 
-# 3. Set up FFmpeg (Windows)
-mkdir src\ffmpeg
-curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z -o ffmpeg.7z
-7z x ffmpeg.7z -osrc\ffmpeg
+# Activate environment
+venv\Scripts\activate
 
-# 4. Install dependencies
+# 3. Install Python dependencies
 pip install -r requirements.txt
+
+# If pip install fails:
+python -m pip install --upgrade pip
+pip install -r requirements.txt --force-reinstall
+
+# 4. Set up FFmpeg
+# Download ffmpeg.exe and ffprobe.exe from:
+# https://www.gyan.dev/ffmpeg/builds/
+# Place both files in: src/ffmpeg/
+
+# 5. Verify setup
+python src/main.py  # Should launch the application
+```
+
+## 🗺️ Roadmap
+
+- Playlist support
+- video player
+- music player
+- improved UI
+
+## License
