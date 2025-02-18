@@ -179,12 +179,12 @@ python src/main.py
    <img src="images/download_buttons.png" width="200" alt="Download buttons">  
    - **Video**: Click "DOWNLOAD VIDEO" for MP4  
    - **Audio**: Click "DOWNLOAD AUDIO" for MP3  
-
+   
 ### Interface Breakdown
 | UI Element | Purpose | Code Reference |
 |------------|---------|----------------|
 | <img src="images/progress_bar.png" width="200"> | Shows current file progress | `CTkProgressBar` |
-| <img src="images/search_results.png" width="300"> | Displays YouTube search results with thumbnails | `CTkScrollableFrame` |
+| <img src="images/search_results.png" width="200"> | Displays YouTube search results with thumbnails | `CTkScrollableFrame` |
 | <img src="images/queue_panel.png" width="200"> | Lists queued URLs with remove buttons | `CTkScrollableFrame` |
 
 ### Settings Explained
@@ -194,6 +194,7 @@ python src/main.py
 self.resolution_menu = CTkOptionMenu(
     values=["1080p", "720p", "480p", "360p"]
 )
+```
 
 ## 🗺️ Roadmap
 
