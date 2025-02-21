@@ -77,7 +77,7 @@ venv\Scripts\activate  # Windows
 # source venv/bin/activate  # macOS/Linux (when support is available)
 
 # 3. Install Python dependencies
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 
 # 4. Configure FFmpeg
 # Download from: https://www.gyan.dev/ffmpeg/builds/
