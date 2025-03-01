@@ -4,7 +4,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://python.org)
 ![FFmpeg Required](https://img.shields.io/badge/FFmpeg-Required-orange.svg)
 
-<img src="images/YoutubeDownloaderv1.0.3.png" width="885" alt="Youtube Downloader Interface Preview">
+<img src="images/YoutubeDownloaderv1.0.4.png" width="885" alt="Youtube Downloader Interface Preview">
 
 ## Project Overview
 
