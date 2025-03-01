@@ -21,7 +21,7 @@ from PIL import Image, ImageDraw
 import io
 from concurrent.futures import ThreadPoolExecutor
 
-def detect_gpu(ffmpeg_path):
+def detect_gpu(ffmpeg_path: str) -> str:
 	"""Detects the available GPU and returns its type."""
 	try:
 		result = subprocess.run(
@@ -52,7 +52,7 @@ def detect_gpu(ffmpeg_path):
 			logging.critical("FFmpeg detection timed out")
 			raise
 
-def sanitize_filename(filename):
+def sanitize_filename(filename: str) -> str:
 	"""Sanitizes a filename by removing invalid characters and limiting length."""
 	filename = re.sub(r'[\\/*?:"<>|]', '', filename)
 	filename = filename.encode('ascii', 'ignore').decode('ascii')
@@ -905,4 +905,4 @@ class App(CTk):
 if __name__ == "__main__":
 	app = App()
 	app.mainloop()
-		
+
