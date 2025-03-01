@@ -139,8 +139,8 @@ class App(CTk):
 	"""Main application window."""
 	def __init__(self):
 		super().__init__(fg_color='#040D12')
-		self.title("YouTube Downloader v1.0.3")
-		self.geometry("1015x450")
+		self.title("YouTube Downloader v1.0.4")
+		self.geometry("860x550")
 		self.resizable(0, 0)
 		self.attributes('-topmost', True)
 		self.my_font = CTkFont(family="Helvetica", weight="bold")
@@ -188,20 +188,20 @@ class App(CTk):
 		self.link_entry = CTkEntry(
 			master=self.main_frame,
 			height=30,
-			width=275,
-			corner_radius=5,
+			width=300,
+			corner_radius=0,
 			font=self.my_font,
-			placeholder_text="Enter YouTube URL here...",
+			placeholder_text="Manually Enter YouTube URL here...",
 			fg_color='#183D3D',
 			text_color='#93B1A6',
 			placeholder_text_color='#93B1A6'
 		)
-		self.link_entry.place(x=10, y=10)
+		self.link_entry.place(x=10, y=340)
 
 		self.add_button = CTkButton(
 			master=self.main_frame,
 			height=30,
-			width=275,
+			width=100,
 			corner_radius=0,
 			text="ADD LINK",
 			command=self.add_link,
@@ -209,23 +209,23 @@ class App(CTk):
 			fg_color='#183D3D',
 			text_color='#93B1A6',
 		)
-		self.add_button.place(x=10, y=50)
+		self.add_button.place(x=315, y=340)
 
 		self.directory_label = CTkLabel(
 			master=self.main_frame,
-			height=240,
-			width=275,
+			height=60,
+			width=405,
 			text="No directory selected",
 			wraplength=275,
 			font=self.my_font,
 			text_color='#93B1A6',
 		)
-		self.directory_label.place(x=10, y=90)
+		self.directory_label.place(x=10, y=420)
 
 		self.dir_button = CTkButton(
 			master=self.main_frame,
 			height=30,
-			width=275,
+			width=405,
 			corner_radius=0,
 			text="CHOOSE SAVE LOCATION",
 			command=self.select_directory,
@@ -233,12 +233,12 @@ class App(CTk):
 			fg_color='#183D3D',
 			text_color='#93B1A6',
 		)
-		self.dir_button.place(x=10, y=340)
+		self.dir_button.place(x=10, y=490)
 
 		self.search_entry = CTkEntry(
 			master=self.main_frame,
 			height=30,
-			width=self.THUMBNAIL_WIDTH+ 277,
+			width=300,
 			corner_radius=0,
 			font=self.my_font,
 			placeholder_text="Search YouTube Videos...",
@@ -246,14 +246,27 @@ class App(CTk):
 			text_color='#93B1A6',
 			placeholder_text_color='#93B1A6'
 		)
-		self.search_entry.place(x=580, y=340)
+		self.search_entry.place(x=425, y=340)
 		self.search_entry.bind("<Return>", lambda event: self.perform_search())
+
+		self.search_button = CTkButton(
+			master=self.main_frame,
+			height=30,
+			width=100,
+			corner_radius=0,
+			text="SEARCH",
+			command=self.perform_search,
+			font=self.my_font,
+			fg_color='#183D3D',
+			text_color='#93B1A6',
+		)
+		self.search_button.place(x=729, y=340)
 
 		self.encoder_menu = CTkOptionMenu(
 			master=self.main_frame,
 			values=self.get_available_encoders(self.ffmpeg_path),
 			height=30,
-			width=self.THUMBNAIL_WIDTH+ 277,
+			width=405,
 			corner_radius=0,
 			font=self.my_font,
 			dropdown_font=self.my_font,
@@ -263,7 +276,7 @@ class App(CTk):
 			text_color='#93B1A6',
 			dropdown_text_color='#93B1A6',
 		)
-		self.encoder_menu.place(x=580, y=380)
+		self.encoder_menu.place(x=425, y=420)
 
 		self.search_results_frame = CTkScrollableFrame(
 			master=self.main_frame,
@@ -272,21 +285,21 @@ class App(CTk):
 			corner_radius=0,
    		fg_color='#183D3D'
 		)
-		self.search_results_frame.place(x=580, y=10)
+		self.search_results_frame.place(x=425, y=10)
 
 		self.scrollable_frame = CTkScrollableFrame(
 			master=self.main_frame,
-			width=260,
+			width=self.THUMBNAIL_WIDTH + 260,
 			height=320,
 			corner_radius=0,
 			fg_color='#183D3D'
 		)
-		self.scrollable_frame.place(x=295, y=10)
+		self.scrollable_frame.place(x=10, y=10)
 
 		self.audio_button = CTkButton(
 			master=self.main_frame,
 			height=30,
-			width=135,
+			width=200,
 			corner_radius=0,
 			text="DOWNLOAD AUDIO",
 			command=lambda: self.download_all("audio"),
@@ -294,13 +307,13 @@ class App(CTk):
 			fg_color='#183D3D',
 			text_color='#93B1A6',
 		)
-		self.audio_button.place(x=295, y=340)
+		self.audio_button.place(x=10, y=380)
 
 		self.resolution_menu = CTkOptionMenu(
 			master=self.main_frame,
 			values=["1080p", "720p", "480p", "360p"],
 			height=30,
-			width=135,
+			width=200,
 			corner_radius=0,
 			font=self.my_font,
 			dropdown_font=self.my_font,
@@ -311,13 +324,13 @@ class App(CTk):
 			dropdown_text_color='#93B1A6',
 		)
 		self.resolution_menu.set("720p")
-		self.resolution_menu.place(x=438, y=380)
+		self.resolution_menu.place(x=425, y=380)
 		
 		self.bitrate_menu = CTkOptionMenu(
 			master=self.main_frame,
 			values=["10Mpbs", "6Mbps", "5Mbps", "4Mbps", "3Mbps", "2Mbps"],
 			height=30,
-			width=135,
+			width=200,
 			corner_radius=0,
 			font=self.my_font,
 			dropdown_font=self.my_font,
@@ -328,12 +341,12 @@ class App(CTk):
 			dropdown_text_color='#93B1A6',
 		)
 		self.bitrate_menu.set("5Mbps")
-		self.bitrate_menu.place(x=295, y=380)
+		self.bitrate_menu.place(x=630, y=380)
 
 		self.video_button = CTkButton(
 			master=self.main_frame,
 			height=30,
-			width=135,
+			width=200,
 			corner_radius=0,
 			text="DOWNLOAD VIDEO",
 			command=lambda: self.download_all("video"),
@@ -341,18 +354,18 @@ class App(CTk):
 			fg_color='#183D3D',
 			text_color='#93B1A6',
 		)
-		self.video_button.place(x=437, y=340)
+		self.video_button.place(x=215, y=380)
 
 		self.progress_bar = CTkProgressBar(
 			master=self.main_frame,
 			orientation="horizontal",
-			width=275,
-			height=30,
+			width=405,
+			height=50,
 			corner_radius=0,
 			fg_color='#183D3D',
 		)
 		self.progress_bar.set(0)
-		self.progress_bar.place(x=10, y=380)
+		self.progress_bar.place(x=425, y=460)
 
 		self.progress_label = CTkLabel(
 			master=self.main_frame,
@@ -362,7 +375,7 @@ class App(CTk):
 			fg_color="transparent",
 			text_color='#93B1A6',
 		)
-		self.progress_label.place(x=10, y=410)
+		self.progress_label.place(x=425, y=510)
 
 		self.link_entry.bind("<Return>", lambda event: self.add_link())
 		self.links = []
@@ -523,14 +536,18 @@ class App(CTk):
 					title_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
 					CTkButton(
-							content_frame,
-							text="ADD",
-							width=60,
-							corner_radius=5,
-							font=self.my_font,
-							text_color='#93B1A6',
-							fg_color='#183D3D',
-							command=lambda url=video.get('url'): self.add_link(url)
+						content_frame,
+						text="ADD",
+						width=60,
+						corner_radius=5,
+						font=self.my_font,
+						text_color='#93B1A6',
+						fg_color='#183D3D',
+						command=lambda v=video: self.add_link(  # v captures current video
+							url=v.get('url'),
+							video_id=v.get('id'),
+							title=v.get('title')
+						)
 					).grid(row=0, column=1, padx=5, sticky="e")
 
 					video_id = video.get('id')
@@ -615,26 +632,98 @@ class App(CTk):
 			self.directory_label.configure(text=f"Save Location: {directory}")
 			self.download_directory = directory
 
-	def add_link(self, url=None):
-		"""puts the links into the link list"""
+	def add_link(self, url=None, video_id=None, title=None):
+		"""Adds links to the download list with thumbnails and titles"""
 		link = url or self.link_entry.get()
 		if link:
 			self.links.append(link)
-			link_row = CTkFrame(master=self.scrollable_frame, corner_radius=10, fg_color='#040D12')
-			link_row.pack(fill="x", padx=5, pady=2)
-			CTkLabel(link_row, text=link, font=self.my_font, wraplength=150, text_color='#93B1A6').pack(side="left", padx=5, pady=5)
-			CTkButton(
+   
+			link_row = CTkFrame(
+				master=self.scrollable_frame, 
+				height=self.THUMBNAIL_HEIGHT, 
+				fg_color="#040D12"
+			)
+			link_row.pack(fill="x", padx=5, pady=3)
+
+			thumbnail_label = CTkLabel(
 				link_row,
+				image=self.placeholder_image,
+				text="",
+				width=self.THUMBNAIL_WIDTH,
+				height=self.THUMBNAIL_HEIGHT,
+			)
+			thumbnail_label.pack(side="left", padx=5, pady=5)
+
+			content_frame = CTkFrame(link_row, fg_color="transparent")
+			content_frame.pack(side="left", fill="both", expand=True, padx=3)
+
+			title_text = title or "Loading..."
+			title_label = CTkLabel(
+				content_frame,
+				text=title_text,
+				font=self.my_font,
+				text_color='#93B1A6',
+				wraplength=150,
+				width=150,
+				justify='left',
+				anchor="w"
+			)
+			title_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
+			# Remove button
+			CTkButton(
+				content_frame,
 				text="REMOVE",
+				width=60,
 				corner_radius=5,
 				font=self.my_font,
+				text_color='#93B1A6',
 				fg_color='#183D3D',
-				text_color= '#93B1A6',
 				command=lambda: self.remove_link(link, link_row)
-			).pack(side="right", padx=5, pady=5)
+			).grid(row=0, column=1, padx=5, sticky="e")
+
+			# Store references for later updates
+			link_row.thumbnail = thumbnail_label
+			link_row.title = title_label
 			self.link_rows.append(link_row)
+
+			# Fetch metadata if not provided
+			if not (video_id and title):
+				self.thumbnail_executor.submit(
+					self.fetch_link_metadata, 
+					link, 
+					link_row
+				)
+			else:
+				self._load_thumbnail(video_id, thumbnail_label)
+				title_label.configure(text=title)
+
 			if not url:
 				self.link_entry.delete(0, "end")
+    
+	def fetch_link_metadata(self, link, link_row):
+		"""Fetches metadata for manually entered URLs"""
+		try:
+			with yt_dlp.YoutubeDL({
+				'quiet': True,
+				'extract_flat': True,
+				'skip_download': True,
+				'noplaylist': True
+			}) as ydl:
+				info = ydl.extract_info(link, download=False)
+				video_id = info.get('id')
+				title = info.get('title', link)
+				
+				self.after(0, lambda: [
+					link_row.title.configure(text=title),
+					self._load_thumbnail(video_id, link_row.thumbnail) 
+					if video_id else None
+				])
+		except Exception as e:
+			self.after(0, lambda: [
+				link_row.title.configure(text=link),
+				link_row.thumbnail.configure(image=self.placeholder_image)
+			])
 
 	def remove_link(self, link, row):
 		"""removes the link from the links list"""
